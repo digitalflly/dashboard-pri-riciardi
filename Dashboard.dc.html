@@ -652,6 +652,7 @@ class Component extends DCLogic {
       sales: {},
       salesLoading: false,
       salesError: '',
+      seg: {},
     };
     this.ADS_ACCOUNT_ID = '10101511135973327';
     this.ADS_CAMPAIGN_MATCH = {
@@ -695,7 +696,18 @@ class Component extends DCLogic {
       { key:'seguidores', name:'Novos Seguidores' },
       { key:'engajamento', name:'Engajamento' },
     ];
-    // Novos Seguidores — turbinamento Instagram (extrações mensais do Drive). [nome, gasto, alcance, impressões, visitas, seguidores]
+    // Novos Seguidores — turbinamento Instagram (extrações DIÁRIAS .xlsx no Drive, lidas ao vivo via gviz).
+    // Cada linha = um dia (coluna "Day") × uma publicação turbinada; os dados são agregados por dia, então o
+    // filtro de datas recorta no nível diário. Para um mês novo basta somar o ID do arquivo aqui.
+    this.SEG_SHEETS = [
+      '1O6RbLxS8nZAUSM6CilDnFG6HwVkwKmqF', // fev/2026 (diário)
+      '17gt_tb7tXcMrg_L2LESTVrYS8vxBnMQt', // mar/2026 (diário)
+      '1uqXzlB1lUvBoa4E_-63GhVQ9y73Xyer6', // abr/2026 (diário)
+      '1xy2DkOuR8_l0toER-TjM69wr1yl7I9o6', // mai/2026 (diário)
+      '1-fknkfQbV5MlBrcQSn-75KY8ciKSXjM-', // jun/2026 (diário)
+    ];
+    this.SEG_CKEY = 'priSeg:v3';
+    // Fallback offline (único caso o Drive falhe na 1ª carga) — os dados ao vivo substituem isto.
     this.SEGUIDORES = {
       '2026-02':[
         ['O ciclo menstrual é um relatório',196.73,65362,67041,153,10],
@@ -765,6 +777,7 @@ class Component extends DCLogic {
       for(let i=localStorage.length-1;i>=0;i--){
         const k=localStorage.key(i); if(!k) continue;
         if(/^priSales:v\d+$/.test(k) && k!==this.SALES_CKEY) localStorage.removeItem(k);
+        else if(/^priSeg:v\d+$/.test(k) && k!==this.SEG_CKEY) localStorage.removeItem(k);
         else if(k.indexOf('dbi_posts_cache_')===0 && k!=='dbi_posts_cache_'+H) localStorage.removeItem(k);
         else if(k.indexOf('igdemo_')===0 && k!=='igdemo_'+H) localStorage.removeItem(k);
       }
@@ -919,7 +932,7 @@ class Component extends DCLogic {
 
   /* ============ HANDLERS ============ */
   setPage(p){ this.setState({page:p}); }
-  onRefresh(){ this.fetchLive(); }
+  onRefresh(){ this.fetchLive(); this.fetchAds(); this.fetchSales(); this.fetchSeguidores(); this.fetchDemographics(true); }
   nowStamp(){ const now=new Date(); const MN=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return now.getDate()+' '+MN[now.getMonth()]+' '+now.getFullYear()+' · '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'); }
   nowYMD(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); }
   async fetchLive(){
@@ -985,10 +998,10 @@ class Component extends DCLogic {
 
   /* ============ CAPAS DURÁVEIS (data URL no cache) ============ */
   // demografia lifetime (idade/gênero/cidade) — cache 7 dias
-  async fetchDemographics(){
+  async fetchDemographics(force){
     const KEY=this.WINDSOR_KEY, H=(this.HANDLE||'priscilariciardi');
     const CK='igdemo_'+H;
-    try{ const c=JSON.parse(localStorage.getItem(CK)||'null'); if(c && c.savedAt && (Date.now()-c.savedAt)<7*864e5 && c.demo){ this.setState({demo:c.demo}); return; } }catch(e){}
+    try{ const c=JSON.parse(localStorage.getItem(CK)||'null'); if(!force && c && c.savedAt && (Date.now()-c.savedAt)<7*864e5 && c.demo){ this.setState({demo:c.demo}); return; } }catch(e){}
     const fd=(d)=>this.ymd(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));
     const to=new Date(), from=new Date(to.getTime()-30*864e5);
     const q=async(fields)=>{ const u='https://connectors.windsor.ai/instagram?api_key='+encodeURIComponent(KEY)+'&date_from='+fd(from)+'&date_to='+fd(to)+'&fields='+encodeURIComponent('username,'+fields)+'&_cb='+Date.now(); const r=await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP'+r.status); const j=await r.json(); const arr=(j&&j.data)?j.data:[]; return arr.filter(x=>String(x.username||'').toLowerCase()===H); };
@@ -1047,7 +1060,7 @@ class Component extends DCLogic {
   }
 
   /* ============ CHARTS ============ */
-  componentDidMount(){ this.drawCharts(); this.fetchLive(); this.fetchAds(); this.fetchDemographics(); this.fetchSales(); }
+  componentDidMount(){ this.drawCharts(); try{ const c=JSON.parse(localStorage.getItem(this.SEG_CKEY)||'null'); if(c&&Object.keys(c).length) this.setState({seg:c}); }catch(e){} this.fetchLive(); this.fetchAds(); this.fetchDemographics(); this.fetchSales(); this.fetchSeguidores(); }
 
   // Facebook Ads (Windsor) — campanhas por produto (WA/Reset/Ciclo/Essência).
   // Semeia desde mai/2025 (cache) e depois só re-busca os 3 dias anteriores à atualização.
@@ -1230,7 +1243,7 @@ class Component extends DCLogic {
     const base={
       brand:M.profile, lastSync:S.lastSync, refreshing:S.refreshing, refreshLabel: S.refreshing?'Atualizando…':'Atualizar',
       onRefresh:()=>this.onRefresh(),
-      sourceLabel: S.dataError? ('erro: '+S.dataError).slice(0,58) : (S.mediaLoading? ('ao vivo · @'+M.profile.handle+' · carregando publicações…') : (S.refreshing? 'buscando dados ao vivo…' : (S.live? ('ao vivo · @'+M.profile.handle) : 'snapshot de demonstração'))),
+      sourceLabel: S.dataError? ('erro: '+S.dataError).slice(0,58) : (S.mediaLoading? ('ao vivo · @'+M.profile.handle+' · carregando dados…') : (S.refreshing? 'buscando dados ao vivo…' : (S.live? ('ao vivo · @'+M.profile.handle) : 'snapshot de demonstração'))),
       sourceColor: S.dataError? 'var(--danger)' : (S.mediaLoading? 'var(--warning)' : (S.live? 'var(--success)' : 'var(--ink-300)')),
       dormant: S.dormant && !S.mediaLoading,
       pages, month:S.month, week:S.week, monthOptions, weekOptions,
@@ -1543,6 +1556,42 @@ class Component extends DCLogic {
     }catch(e){ this.setState({salesLoading:false, salesError:(e&&e.message)||'falha ao ler vendas'}); }
   }
 
+  /* ============ NOVOS SEGUIDORES (turbinamento — .xlsx do Drive, ao vivo via gviz) ============ */
+  async fetchSeguidores(){
+    if(this._segLoading) return;
+    this._segLoading=true;
+    const num=(s)=>{ s=String(s||'').trim(); if(!s) return 0; if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.'); const v=parseFloat(s.replace(/[^0-9.\-]/g,'')); return isNaN(v)?0:v; };
+    const clean=(s)=>{ const t=String(s||'').replace(/^\s*(Post do Instagram|Instagram post|Publicação do Instagram|Instagram Post|Instagram Profile Visits Ad|Instagram Mixed Goals[^:]*)\s*:\s*/i,'').trim(); return t||String(s||'').trim(); };
+    try{
+      // acc[dia][nome] — agrega cada publicação turbinada por DIA (coluna "Day")
+      const acc={};
+      await Promise.all(this.SEG_SHEETS.map(async(id)=>{
+        try{
+          const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
+          const r=await fetch(url,{cache:'no-store'}); if(!r.ok) return;
+          const rows=this.parseCSV(await r.text());
+          // layout diário: Day(0) Campaign(1) Adset(2) Spend(3) DelivStatus(4) DelivLevel(5) Reach(6) Impr(7) Visits(8) Follows(9)
+          rows.slice(1).forEach(c=>{
+            if(!c||c.length<10) return;
+            const day=String(c[0]||'').trim(); if(!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+            const name=clean(c[1]); if(!name) return;
+            const spend=num(c[3]); if(spend<=0) return;             // só publicações com verba
+            if(!acc[day]) acc[day]={};
+            if(!acc[day][name]) acc[day][name]={ name, spend:0, reach:0, impr:0, visits:0, follows:0 };
+            const a=acc[day][name];
+            a.spend+=spend; a.reach+=num(c[6]); a.impr+=num(c[7]); a.visits+=num(c[8]); a.follows+=num(c[9]);
+          });
+        }catch(e){}
+      }));
+      const out={};
+      Object.keys(acc).forEach(day=>{ out[day]=Object.values(acc[day]).map(o=>[o.name,o.spend,o.reach,o.impr,o.visits,o.follows]); });
+      if(Object.keys(out).length){
+        try{ localStorage.setItem(this.SEG_CKEY, JSON.stringify(out)); }catch(e){}
+        this.setState({seg:out});
+      }
+    }finally{ this._segLoading=false; }
+  }
+
   // Converte linhas da planilha em registros {fatura,status,date,item,net,tab}. Colunas Eduzz fixas.
   aggregateSales(rows){
     const num=(s)=>{ s=String(s||'').replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.'); const v=parseFloat(s); return isNaN(v)?0:v; };
@@ -1634,8 +1683,14 @@ class Component extends DCLogic {
     const S=this.state;
     const inRange=(d)=>{ if(!d) return false; if(S.candMonth!=='all' && d.slice(0,7)!==S.candMonth) return false; if(S.candFrom && d<S.candFrom) return false; if(S.candTo && d>S.candTo) return false; return true; };
     const money2=(v)=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-    const pubs=[];
-    Object.keys(this.SEGUIDORES).forEach(m=>{ const d=m+'-01'; if(!inRange(d)) return; this.SEGUIDORES[m].forEach(r=>pubs.push({ name:r[0], spend:r[1], reach:r[2], impr:r[3], visits:r[4], follows:r[5] })); });
+    const SEG = (S.seg && Object.keys(S.seg).length) ? S.seg : this.SEGUIDORES;
+    // agrega cada publicação turbinada ao longo dos dias dentro do range (chave = dia "2026-06-30"; o
+    // fallback mensal usa chave "2026-06" → dia representativo "2026-06-01")
+    const byName={};
+    Object.keys(SEG).forEach(k=>{ const day = k.length>7 ? k : (k+'-01'); if(!inRange(day)) return;
+      SEG[k].forEach(r=>{ const nm=r[0]; if(!byName[nm]) byName[nm]={ name:nm, spend:0, reach:0, impr:0, visits:0, follows:0 };
+        const a=byName[nm]; a.spend+=r[1]; a.reach+=r[2]; a.impr+=r[3]; a.visits+=r[4]; a.follows+=r[5]; }); });
+    const pubs=Object.values(byName);
     const sum=(f)=>pubs.reduce((a,x)=>a+(x[f]||0),0);
     const spend=sum('spend'), reach=sum('reach'), impr=sum('impr'), visits=sum('visits'), follows=sum('follows');
     const custoSeg= follows? spend/follows : 0;
@@ -1660,10 +1715,8 @@ class Component extends DCLogic {
       spend:money2(p.spend), reach:this.fmtNum(p.reach), impr:this.fmtNum(p.impr), visits:this.fmtNum(p.visits), follows:this.fmtNum(p.follows),
       cost:p.follows? money2(p.spend/p.follows):'—', conv:p.visits? this.fmtPct(p.follows/p.visits*100):'—' }));
     const adsStatus = pubs.length? '' : 'sem turbinamento no período';
-    // rosca: distribuição do orçamento entre os anúncios ativos no range (agrega a mesma publicação entre meses)
-    const active=pubs.filter(p=>p.spend>0);
-    const byName={}; active.forEach(p=>{ byName[p.name]=(byName[p.name]||0)+p.spend; });
-    let budgetItems=Object.entries(byName).map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count);
+    // rosca: distribuição do orçamento entre as publicações turbinadas no range (pubs já agregado por nome)
+    let budgetItems=pubs.filter(p=>p.spend>0).map(p=>({label:p.name, count:p.spend})).sort((a,b)=>b.count-a.count);
     if(budgetItems.length>10){ const top=budgetItems.slice(0,9); const rest=budgetItems.slice(9).reduce((a,x)=>a+x.count,0); top.push({label:'Outros', count:rest}); budgetItems=top; }
     if(this._funnelCfgs){ this._funnelCfgs['seg-budget']=this.doughnutCfg(budgetItems, {money:true}); }
     return { investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus };
