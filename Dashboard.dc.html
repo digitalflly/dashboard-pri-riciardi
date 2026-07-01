@@ -474,10 +474,11 @@
                   <tr style="text-align:right;">
                     <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:left; padding:0 8px 10px 4px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; width:32%;">Conjunto</th>
                     <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Impr.</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Cliques</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Visu. pág.</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Connect</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:right; padding:0 4px 10px 8px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Leads</th>
+                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">CTR</th>
+                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS2 }}</th>
+                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS3 }}</th>
+                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS4 }}</th>
+                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:right; padding:0 4px 10px 8px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS5 }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -487,6 +488,7 @@
                         <span style="font-size:12px; font-weight:500; color:var(--text-strong); line-height:1.3; word-break:break-word;">{{ a.name }}</span>
                       </td>
                       <td data-keepcase="1" style="text-align:right; padding:10px 8px; font-size:12.5px; color:var(--text-strong); white-space:nowrap;">{{ a.impr }}</td>
+                      <td data-keepcase="1" style="text-align:right; padding:10px 8px; font-size:12.5px; color:var(--text-strong); white-space:nowrap;">{{ a.ctr }}</td>
                       <td data-keepcase="1" style="text-align:right; padding:10px 8px; font-size:12.5px; color:var(--text-strong); white-space:nowrap;">{{ a.clk }}</td>
                       <td data-keepcase="1" style="text-align:right; padding:10px 8px; font-size:12.5px; color:var(--text-strong); white-space:nowrap;">{{ a.lpv }}</td>
                       <td data-keepcase="1" style="text-align:right; padding:10px 8px; font-size:12.5px; color:var(--text-strong); white-space:nowrap;">{{ a.cr }}</td>
@@ -541,10 +543,11 @@
                 <tr style="text-align:right;">
                   <th style="text-align:left; padding:0 12px 10px 4px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Anúncio</th>
                   <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Impressões</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Cliques no link</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Visualização da página</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Connect rate</th>
-                  <th style="text-align:right; padding:0 4px 10px 12px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Leads do gerenciador</th>
+                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">CTR</th>
+                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA2 }}</th>
+                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA3 }}</th>
+                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA4 }}</th>
+                  <th style="text-align:right; padding:0 4px 10px 12px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA5 }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -557,6 +560,7 @@
                       </div>
                     </td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.impr }}</td>
+                    <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.ctr }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.clk }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.lpv }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.cr }}</td>
@@ -656,12 +660,13 @@ class Component extends DCLogic {
     };
     this.ADS_ACCOUNT_ID = '10101511135973327';
     this.ADS_CAMPAIGN_MATCH = {
-      wa:       /WOMANS[\s-]*ACADEMY|\bWA\b/i,
-      reset:    /RESET/i,
-      ciclo:    /CICLO[\s-]*LEVE/i,
-      essencia: /ESS[EÊ]NCIA[\s-]*METAB/i,
+      wa:         /WOMANS[\s-]*ACADEMY|\bWA\b/i,
+      reset:      /RESET/i,
+      ciclo:      /CICLO[\s-]*LEVE/i,
+      essencia:   /ESS[EÊ]NCIA[\s-]*METAB/i,
+      engajamento:/ENGAJAMENTO/i,
     };
-    this.ADS_CKEY = 'priAdsCampaigns:v1';
+    this.ADS_CKEY = 'priAdsCampaigns:v3';
     // Vendas (Eduzz) — planilhas mensais públicas no Drive, lidas ao vivo via gviz.
     this.SALES_SHEETS = {
       '2025-05':'1-gOe6ojnzaMAD3MnUijgxr5JdWvcaZUk24zZ-SImWMA',
@@ -777,6 +782,7 @@ class Component extends DCLogic {
       for(let i=localStorage.length-1;i>=0;i--){
         const k=localStorage.key(i); if(!k) continue;
         if(/^priSales:v\d+$/.test(k) && k!==this.SALES_CKEY) localStorage.removeItem(k);
+        else if(/^priAdsCampaigns:v\d+$/.test(k) && k!==this.ADS_CKEY) localStorage.removeItem(k);
         else if(/^priSeg:v\d+$/.test(k) && k!==this.SEG_CKEY) localStorage.removeItem(k);
         else if(k.indexOf('dbi_posts_cache_')===0 && k!=='dbi_posts_cache_'+H) localStorage.removeItem(k);
         else if(k.indexOf('igdemo_')===0 && k!=='igdemo_'+H) localStorage.removeItem(k);
@@ -1069,7 +1075,7 @@ class Component extends DCLogic {
     this.setState({adsLoading:true, adsError:''});
     try{
       const key=this.WINDSOR_KEY;
-      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_lead,spend';
+      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_lead,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
       const num=(v)=>(v==null||v==='')?0:(+v||0);
       const acct=this.ADS_ACCOUNT_ID;
       const ymd=(d)=>this.ymd(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));
@@ -1080,11 +1086,13 @@ class Component extends DCLogic {
         const j=await r.json(); if(j.error) throw new Error(String(j.error).slice(0,120));
         return (j.data||[]).filter(x=>String(x.account_id||'').replace(/\D/g,'')===acct);
       };
-      const prodOf=(camp)=>{ for(const k of Object.keys(this.ADS_CAMPAIGN_MATCH)){ if(this.ADS_CAMPAIGN_MATCH[k].test(camp||'')) return k; } return null; };
-      const ingest=(store, rows)=>{ rows.forEach(x=>{ const p=prodOf(x.campaign); if(!p) return;
-        const d=dnorm(x.date), ad=x.ad_name||'(sem nome)', id=p+'|'+d+'|'+ad;
-        if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,spend:0 };
-        const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_lead); s.spend+=num(x.spend); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; }); };
+      // uma campanha pode casar com vários baldes (ex.: [ENGAJAMENTO][CICLO-LEVE] entra em ciclo E engajamento)
+      const prodsOf=(camp)=>{ const out=[]; for(const k of Object.keys(this.ADS_CAMPAIGN_MATCH)){ if(this.ADS_CAMPAIGN_MATCH[k].test(camp||'')) out.push(k); } return out; };
+      const ingest=(store, rows)=>{ rows.forEach(x=>{ const ps=prodsOf(x.campaign); if(!ps.length) return;
+        const d=dnorm(x.date), ad=x.ad_name||'(sem nome)';
+        ps.forEach(p=>{ const id=p+'|'+d+'|'+ad;
+          if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
+          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_lead); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; }); }); };
       const today=new Date(); const todayStr=ymd(today);
       let store={}, cached=null;
       try{ cached=JSON.parse(localStorage.getItem(this.ADS_CKEY)||'null'); }catch(e){}
@@ -1475,12 +1483,13 @@ class Component extends DCLogic {
     // respeita os filtros de mês / intervalo de datas da página
     const inRange=(d)=>{ if(!d) return false; if(S.candMonth!=='all' && d.slice(0,7)!==S.candMonth) return false; if(S.candFrom && d<S.candFrom) return false; if(S.candTo && d>S.candTo) return false; return true; };
     const rows=(S.adRows||[]).filter(r=> r.c===key && inRange(r.d));
+    const isEng = key==='engajamento';
     const byAd={}, byAdset={};
     rows.forEach(r=>{
-      if(!byAd[r.ad]) byAd[r.ad]={ name:r.ad, thumb:'', impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0 };
-      const a=byAd[r.ad]; a.impressions+=r.impr; a.reach+=r.reach; a.linkClicks+=r.clk; a.lpViews+=r.lpv; a.leads+=r.leads; a.spend+=r.spend; if(!a.thumb&&r.thumb) a.thumb=r.thumb;
-      if(!byAdset[r.adset]) byAdset[r.adset]={ name:r.adset, impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0 };
-      const s=byAdset[r.adset]; s.impressions+=r.impr; s.reach+=r.reach; s.linkClicks+=r.clk; s.lpViews+=r.lpv; s.leads+=r.leads; s.spend+=r.spend;
+      if(!byAd[r.ad]) byAd[r.ad]={ name:r.ad, thumb:'', impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
+      const a=byAd[r.ad]; a.impressions+=r.impr; a.reach+=r.reach; a.linkClicks+=r.clk; a.lpViews+=r.lpv; a.leads+=r.leads; a.spend+=r.spend; a.eng+=(r.eng||0); a.vv+=(r.vv||0); a.reac+=(r.reac||0); a.save+=(r.save||0); if(!a.thumb&&r.thumb) a.thumb=r.thumb;
+      if(!byAdset[r.adset]) byAdset[r.adset]={ name:r.adset, impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
+      const s=byAdset[r.adset]; s.impressions+=r.impr; s.reach+=r.reach; s.linkClicks+=r.clk; s.lpViews+=r.lpv; s.leads+=r.leads; s.spend+=r.spend; s.eng+=(r.eng||0); s.vv+=(r.vv||0); s.reac+=(r.reac||0); s.save+=(r.save||0);
     });
     const ads=Object.values(byAd).sort((a,b)=>b.impressions-a.impressions);
     const adsetsArr=Object.values(byAdset).sort((a,b)=>b.impressions-a.impressions);
@@ -1489,43 +1498,79 @@ class Component extends DCLogic {
     const hasReal = ads.length>0;
     const sum=(f)=>ads.reduce((a,x)=>a+(x[f]||0),0);
     const alcance=sum('reach'), impressoes=sum('impressions'), cliques=sum('linkClicks'),
-      lpViews=sum('lpViews'), leadsGer=sum('leads'), investido=sum('spend');
+      lpViews=sum('lpViews'), leadsGer=sum('leads'), investido=sum('spend'),
+      inter=sum('eng'), reprod=sum('vv'), reacoes=sum('reac'), salvos=sum('save');
     const cpm=impressoes? investido/impressoes*1000 : 0;
     const cpc=cliques? investido/cliques : 0;
     const custoGer=leadsGer? investido/leadsGer : 0;
     const connectRate=cliques? lpViews/cliques*100 : 0;
+    const custoInter=inter? investido/inter : 0;
+    const engRate=impressoes? inter/impressoes*100 : 0;
+    const custoReprod=reprod? investido/reprod : 0;
     const div=(a,b)=> b? a/b : null;
-    const raw=[
-      { label:'Alcance', value:alcance, conv:null, cost:null },
-      { label:'Impressões', value:impressoes, freq:div(impressoes,alcance), cost:null },
-      { label:'Cliques no link', value:cliques, conv:div(cliques,impressoes), cost:money2(cpc) },
-      { label:'Visualizações da página', value:lpViews, conv:div(lpViews,cliques), cost:null },
-      { label:'Leads do gerenciador', value:leadsGer, conv:div(leadsGer,lpViews), cost:money2(custoGer) },
-    ];
+    let raw, investStats, colAds, colSets;
+    if(isEng){
+      raw=[
+        { label:'Alcance', value:alcance, conv:null, cost:null },
+        { label:'Impressões', value:impressoes, freq:div(impressoes,alcance), cost:null },
+        { label:'Interações', value:inter, conv:div(inter,impressoes), cost:money2(custoInter) },
+        { label:'Reproduções de vídeo', value:reprod, conv:div(reprod,impressoes), cost:null },
+        { label:'Reações e salvamentos', value:reacoes+salvos, conv:div(reacoes+salvos,inter), cost:null },
+      ];
+      investStats=[
+        { label:'Investimento', value:'R$ '+this.fmtNum(investido) },
+        { label:'CPM', value:money2(cpm) },
+        { label:'Custo por interação', value:money2(custoInter) },
+        { label:'Taxa de engajamento', value:this.fmtPct(engRate) },
+        { label:'Custo por reprodução', value:money2(custoReprod) },
+      ];
+      colAds=['Interações','Reproduções','Reações','Taxa de eng.'];
+      colSets=['Interações','Reprod.','Reações','Taxa eng.'];
+    }else{
+      raw=[
+        { label:'Alcance', value:alcance, conv:null, cost:null },
+        { label:'Impressões', value:impressoes, freq:div(impressoes,alcance), cost:null },
+        { label:'Cliques no link', value:cliques, conv:div(cliques,impressoes), cost:money2(cpc) },
+        { label:'Visualizações da página', value:lpViews, conv:div(lpViews,cliques), cost:null },
+        { label:'Vendas do gerenciador', value:leadsGer, conv:div(leadsGer,lpViews), cost:money2(custoGer) },
+      ];
+      investStats=[
+        { label:'Investimento', value:'R$ '+this.fmtNum(investido) },
+        { label:'CPM', value:money2(cpm) },
+        { label:'Custo por clique', value:money2(cpc) },
+        { label:'Connect rate', value:this.fmtPct(connectRate) },
+        { label:'Custo por venda', value:money2(custoGer) },
+      ];
+      colAds=['Cliques no link','Visualização da página','Connect rate','Vendas do gerenciador'];
+      colSets=['Cliques','Visu. pág.','Connect','Vendas'];
+    }
     const widths=[100,91,80,68,56];
     const investStages=raw.map((s,i)=>{
       const convStr = s.freq!=null ? (s.freq).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : (s.conv==null? '' : this.fmtPct(s.conv*100));
       const left = convStr ? (s.cost ? convStr+'  -  '+s.cost : convStr) : '';
       return { label:s.label, value:this.fmtNum(s.value), left, barStyle:`width:${widths[i]}%; background:#172219;` };
     });
-    const investStats=[
-      { label:'Investimento', value:'R$ '+this.fmtNum(investido) },
-      { label:'CPM', value:money2(cpm) },
-      { label:'Custo por clique', value:money2(cpc) },
-      { label:'Connect rate', value:this.fmtPct(connectRate) },
-      { label:'Custo / lead', value:money2(custoGer) },
-    ];
     const investAds=ads.slice(0,12).map((a,i)=>({ idx:i, name:a.name,
       thumbStyle: a.thumb? `width:42px; height:42px; flex:none; border-radius:5px; background:#172219 center/cover no-repeat url("${a.thumb}");`
         : `width:42px; height:42px; flex:none; border-radius:5px; background:linear-gradient(135deg, #172219, #2C3A2E);`,
-      impr:this.fmtNum(a.impressions), clk:this.fmtNum(a.linkClicks), lpv:this.fmtNum(a.lpViews),
-      cr:this.fmtPct(a.linkClicks? a.lpViews/a.linkClicks*100 : 0), leads:this.fmtNum(a.leads) }));
+      impr:this.fmtNum(a.impressions),
+      ctr:this.fmtPct(a.impressions? a.linkClicks/a.impressions*100 : 0),
+      clk:this.fmtNum(isEng? a.eng : a.linkClicks),
+      lpv:this.fmtNum(isEng? a.vv : a.lpViews),
+      cr:isEng? this.fmtNum(a.reac) : this.fmtPct(a.linkClicks? a.lpViews/a.linkClicks*100 : 0),
+      leads:isEng? this.fmtPct(a.impressions? a.eng/a.impressions*100 : 0) : this.fmtNum(a.leads) }));
     const adsets=adsetsArr;
     const investAdsets=adsets.slice(0,30).map((a,i)=>({ idx:i, name:a.name,
-      impr:this.fmtNum(a.impressions), clk:this.fmtNum(a.linkClicks), lpv:this.fmtNum(a.lpViews),
-      cr:this.fmtPct(a.linkClicks? a.lpViews/a.linkClicks*100 : 0), leads:this.fmtNum(a.leads) }));
+      impr:this.fmtNum(a.impressions),
+      ctr:this.fmtPct(a.impressions? a.linkClicks/a.impressions*100 : 0),
+      clk:this.fmtNum(isEng? a.eng : a.linkClicks),
+      lpv:this.fmtNum(isEng? a.vv : a.lpViews),
+      cr:isEng? this.fmtNum(a.reac) : this.fmtPct(a.linkClicks? a.lpViews/a.linkClicks*100 : 0),
+      leads:isEng? this.fmtPct(a.impressions? a.eng/a.impressions*100 : 0) : this.fmtNum(a.leads) }));
     const adsStatus = S.adsError? ('Facebook Ads: '+S.adsError).slice(0,80) : (S.adsLoading? 'carregando campanhas do Facebook…' : (hasReal? '' : 'sem dados para esta campanha'));
-    return { investShow:true, segMode:false, showAdsets:true, showAds:true, investStages, investStats, investAds, investAdsets, investPubs:[], investEyebrow, adsStatus };
+    return { investShow:true, segMode:false, showAdsets:true, showAds:true, investStages, investStats, investAds, investAdsets, investPubs:[], investEyebrow, adsStatus,
+      colA2:colAds[0], colA3:colAds[1], colA4:colAds[2], colA5:colAds[3],
+      colS2:colSets[0], colS3:colSets[1], colS4:colSets[2], colS5:colSets[3] };
   }
 
   /* ============ VENDAS (Eduzz) ============ */
@@ -1610,7 +1655,7 @@ class Component extends DCLogic {
 
   // KPIs de vendas para um produto, respeitando o filtro de mês / intervalo da página.
   salesInfo(key){
-    if(key==='seguidores') return { salesShow:false, salesFilterShow:false };
+    if(key==='seguidores' || key==='engajamento') return { salesShow:false, salesFilterShow:false };
     const S=this.state;
     const inRange=(d)=>{ if(!d) return false; if(S.candMonth!=='all' && d.slice(0,7)!==S.candMonth) return false; if(S.candFrom && d<S.candFrom) return false; if(S.candTo && d>S.candTo) return false; return true; };
     const norm=(u)=>{ u=(u||'').trim(); return u||'(não informado)'; };
