@@ -554,10 +554,18 @@
                 <sc-for list="{{ investAds }}" as="a" hint-placeholder-count="5">
                   <tr style="border-top:1px solid var(--border-soft);">
                     <td style="padding:10px 12px 10px 4px;">
+                      <sc-if value="{{ a.hasLink }}" hint-placeholder-val="{{ true }}">
+                      <a href="{{ a.perma }}" target="_blank" rel="noopener" title="Abrir criativo no Instagram" style="display:flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; cursor:pointer;">
+                        <div style="{{ a.thumbStyle }}"></div>
+                        <span style="font-size:12.5px; font-weight:500; color:var(--text-strong); white-space:nowrap; border-bottom:1px solid var(--border-strong, rgba(23,34,25,0.25));">{{ a.name }}</span>
+                      </a>
+                      </sc-if>
+                      <sc-if value="{{ a.noLink }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex; align-items:center; gap:10px; min-width:0;">
                         <div style="{{ a.thumbStyle }}"></div>
                         <span style="font-size:12.5px; font-weight:500; color:var(--text-strong); white-space:nowrap;">{{ a.name }}</span>
                       </div>
+                      </sc-if>
                     </td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.impr }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.ctr }}</td>
@@ -666,7 +674,7 @@ class Component extends DCLogic {
       essencia:   /ESS[EÊ]NCIA[\s-]*METAB/i,
       engajamento:/ENGAJAMENTO/i,
     };
-    this.ADS_CKEY = 'priAdsCampaigns:v3';
+    this.ADS_CKEY = 'priAdsCampaigns:v4';
     // Vendas (Eduzz) — planilhas mensais públicas no Drive, lidas ao vivo via gviz.
     this.SALES_SHEETS = {
       '2025-05':'1-gOe6ojnzaMAD3MnUijgxr5JdWvcaZUk24zZ-SImWMA',
@@ -981,7 +989,7 @@ class Component extends DCLogic {
         // 1ª vez (sem cache): semeia o histórico disponível; depois só 30 dias
         const win = seeded ? 30 : 180;
         const mRows=await getF('media_id,timestamp,media_type,media_product_type,media_caption,media_like_count,media_comments_count,media_reach,media_saved,media_shares,media_views,media_url,media_thumbnail_url,username', win);
-        const fresh=mRows.map((r,i)=>{ const likes=num(r.media_like_count),comments=num(r.media_comments_count),shares=num(r.media_shares),saves=num(r.media_saved); const reach=num(r.media_reach), views=num(r.media_views); const eng=num(r.media_engagement)||(likes+comments+shares+saves); const type=(r.media_product_type==='REELS')?'REELS':(r.media_type||'IMAGE'); return { id:r.media_id||null, ts:String(r.timestamp||'').slice(0,10), type, likes,comments,shares,saves, views, reach, eng, caption:String(r.media_caption||'Sem legenda').replace(/\s+/g,' ').trim().slice(0,140), coverIdx:i, cover:String(r.media_url||r.media_thumbnail_url||''), thumb:String(r.media_thumbnail_url||r.media_url||'') }; })
+        const fresh=mRows.map((r,i)=>{ const likes=num(r.media_like_count),comments=num(r.media_comments_count),shares=num(r.media_shares),saves=num(r.media_saved); const reach=num(r.media_reach), views=num(r.media_views); const eng=num(r.media_engagement)||(likes+comments+shares+saves); const type=(r.media_product_type==='REELS')?'REELS':(r.media_type||'IMAGE'); return { id:r.media_id||null, ts:String(r.timestamp||'').slice(0,10), type, likes,comments,shares,saves, views, reach, eng, caption:String(r.media_caption||'Sem legenda').replace(/\s+/g,' ').trim().slice(0,140), coverIdx:i, cover:String(r.media_thumbnail_url||r.media_url||''), thumb:String(r.media_thumbnail_url||r.media_url||'') }; })
           .filter(p=>isDate(p.ts) && p.id);
         // corte de 30 dias: cache fornece tudo anterior, fetch fornece os últimos 30 dias
         const cutoff = fd(new Date(to.getTime()-30*86400000));
@@ -1075,7 +1083,7 @@ class Component extends DCLogic {
     this.setState({adsLoading:true, adsError:''});
     try{
       const key=this.WINDSOR_KEY;
-      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_lead,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
+      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,instagram_permalink_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_lead,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
       const num=(v)=>(v==null||v==='')?0:(+v||0);
       const acct=this.ADS_ACCOUNT_ID;
       const ymd=(d)=>this.ymd(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));
@@ -1091,8 +1099,8 @@ class Component extends DCLogic {
       const ingest=(store, rows)=>{ rows.forEach(x=>{ const ps=prodsOf(x.campaign); if(!ps.length) return;
         const d=dnorm(x.date), ad=x.ad_name||'(sem nome)';
         ps.forEach(p=>{ const id=p+'|'+d+'|'+ad;
-          if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
-          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_lead); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; }); }); };
+          if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', perma:x.instagram_permalink_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
+          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_lead); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; if(!s.perma&&x.instagram_permalink_url) s.perma=x.instagram_permalink_url; }); }); };
       const today=new Date(); const todayStr=ymd(today);
       let store={}, cached=null;
       try{ cached=JSON.parse(localStorage.getItem(this.ADS_CKEY)||'null'); }catch(e){}
@@ -1308,7 +1316,7 @@ class Component extends DCLogic {
       const dayRow=this.dailyAt(p.ts);
       const taps = dayRow? dayRow.taps : null;
       const baseBg=this.COVER_BG[p.coverIdx%this.COVER_BG.length];
-      const src = p.coverData || p.cover;
+      const src = p.coverData || p.thumb || p.cover;
       const coverStyle = src
         ? `position:relative; height:150px; display:flex; align-items:center; justify-content:center; background:linear-gradient(rgba(23,34,25,0.12), rgba(23,34,25,0.40)), center/cover no-repeat url("${src}"), ${baseBg};`
         : `position:relative; height:150px; display:flex; align-items:center; justify-content:center; background:${baseBg}; background-image:radial-gradient(circle at 30% 25%, rgba(255,255,255,0.10), transparent 60%);`;
@@ -1486,8 +1494,8 @@ class Component extends DCLogic {
     const isEng = key==='engajamento';
     const byAd={}, byAdset={};
     rows.forEach(r=>{
-      if(!byAd[r.ad]) byAd[r.ad]={ name:r.ad, thumb:'', impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
-      const a=byAd[r.ad]; a.impressions+=r.impr; a.reach+=r.reach; a.linkClicks+=r.clk; a.lpViews+=r.lpv; a.leads+=r.leads; a.spend+=r.spend; a.eng+=(r.eng||0); a.vv+=(r.vv||0); a.reac+=(r.reac||0); a.save+=(r.save||0); if(!a.thumb&&r.thumb) a.thumb=r.thumb;
+      if(!byAd[r.ad]) byAd[r.ad]={ name:r.ad, thumb:'', perma:'', impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
+      const a=byAd[r.ad]; a.impressions+=r.impr; a.reach+=r.reach; a.linkClicks+=r.clk; a.lpViews+=r.lpv; a.leads+=r.leads; a.spend+=r.spend; a.eng+=(r.eng||0); a.vv+=(r.vv||0); a.reac+=(r.reac||0); a.save+=(r.save||0); if(!a.thumb&&r.thumb) a.thumb=r.thumb; if(!a.perma&&r.perma) a.perma=r.perma;
       if(!byAdset[r.adset]) byAdset[r.adset]={ name:r.adset, impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
       const s=byAdset[r.adset]; s.impressions+=r.impr; s.reach+=r.reach; s.linkClicks+=r.clk; s.lpViews+=r.lpv; s.leads+=r.leads; s.spend+=r.spend; s.eng+=(r.eng||0); s.vv+=(r.vv||0); s.reac+=(r.reac||0); s.save+=(r.save||0);
     });
@@ -1550,7 +1558,7 @@ class Component extends DCLogic {
       const left = convStr ? (s.cost ? convStr+'  -  '+s.cost : convStr) : '';
       return { label:s.label, value:this.fmtNum(s.value), left, barStyle:`width:${widths[i]}%; background:#172219;` };
     });
-    const investAds=ads.slice(0,12).map((a,i)=>({ idx:i, name:a.name,
+    const investAds=ads.slice(0,12).map((a,i)=>({ idx:i, name:a.name, perma:a.perma||'', hasLink:!!a.perma, noLink:!a.perma,
       thumbStyle: a.thumb? `width:42px; height:42px; flex:none; border-radius:5px; background:#172219 center/cover no-repeat url("${a.thumb}");`
         : `width:42px; height:42px; flex:none; border-radius:5px; background:linear-gradient(135deg, #172219, #2C3A2E);`,
       impr:this.fmtNum(a.impressions),
