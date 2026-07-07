@@ -1263,6 +1263,11 @@ class Component extends DCLogic {
       onClick:()=>this.setPage(p.key),
       style:`font-family:var(--font-sans); font-size:13px; font-weight:${S.page===p.key?'600':'500'}; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid ${S.page===p.key?'var(--border-soft)':'transparent'}; border-bottom:2px solid ${S.page===p.key?accent:'transparent'}; background:${S.page===p.key?'var(--surface-page)':'transparent'}; color:${S.page===p.key?'var(--text-strong)':'var(--text-muted)'};`
     }));
+    pages.push({
+      label:'Painel de Performance',
+      onClick:()=>window.open('https://cursos.pririciardi.com.br/painel-performance/','_blank','noopener'),
+      style:`font-family:var(--font-sans); font-size:13px; font-weight:500; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid transparent; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted);`
+    });
 
     const base={
       brand:M.profile, lastSync:S.lastSync, refreshing:S.refreshing, refreshLabel: S.refreshing?'Atualizando…':'Atualizar',
