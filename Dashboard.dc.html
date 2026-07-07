@@ -718,9 +718,16 @@ class Component extends DCLogic {
       '17gt_tb7tXcMrg_L2LESTVrYS8vxBnMQt', // mar/2026 (diário)
       '1uqXzlB1lUvBoa4E_-63GhVQ9y73Xyer6', // abr/2026 (diário)
       '1xy2DkOuR8_l0toER-TjM69wr1yl7I9o6', // mai/2026 (diário)
-      '1-fknkfQbV5MlBrcQSn-75KY8ciKSXjM-', // jun/2026 (diário)
+      '1Fa_HtgQIQqDju_WzN7g-STIlInNKMl2r', // jun/2026 (diário)
+      '1OS0IYUCogBY0QDVDHopVmzlq_SDI0bSr', // jul/2026 (diário)
     ];
-    this.SEG_CKEY = 'priSeg:v3';
+    // Descoberta automática da pasta do Drive (dispensa manter IDs fixos acima).
+    // Cole a chave de API do Google Drive aqui e o dashboard lista a pasta inteira sozinho
+    // a cada atualização — qualquer arquivo novo/renomeado é pego automaticamente.
+    // Sem chave, ele usa a lista fixa SEG_SHEETS acima como fallback.
+    this.DRIVE_API_KEY = 'AIzaSyCuMrZ3_W0CslyhOaIo6TneEL-pJhc1kzs';
+    this.SEG_FOLDER = '1TT1BAo8JaLD9BVo4BL0oxwNXNqEcDdr8';
+    this.SEG_CKEY = 'priSeg:v4';
     // Fallback offline (único caso o Drive falhe na 1ª carga) — os dados ao vivo substituem isto.
     this.SEGUIDORES = {
       '2026-02':[
@@ -1610,6 +1617,24 @@ class Component extends DCLogic {
     }catch(e){ this.setState({salesLoading:false, salesError:(e&&e.message)||'falha ao ler vendas'}); }
   }
 
+  async listDriveFolder(folderId){
+    // Lista os arquivos de uma pasta pública do Drive via Drive API (precisa de DRIVE_API_KEY).
+    // Retorna [{id,name}]; [] se não houver chave ou a chamada falhar.
+    if(!this.DRIVE_API_KEY || !folderId) return [];
+    try{
+      const out=[]; let pageToken='';
+      do{
+        const q=encodeURIComponent("'"+folderId+"' in parents and trashed=false");
+        const url='https://www.googleapis.com/drive/v3/files?q='+q+'&key='+encodeURIComponent(this.DRIVE_API_KEY)+'&fields=nextPageToken,files(id,name,mimeType)&pageSize=200&orderBy=name'+(pageToken?('&pageToken='+pageToken):'')+'&_cb='+Date.now();
+        const r=await fetch(url,{cache:'no-store'}); if(!r.ok) return out;
+        const j=await r.json();
+        (j.files||[]).forEach(f=>out.push({id:f.id, name:f.name||''}));
+        pageToken=j.nextPageToken||'';
+      }while(pageToken);
+      return out;
+    }catch(e){ return []; }
+  }
+
   /* ============ NOVOS SEGUIDORES (turbinamento — .xlsx do Drive, ao vivo via gviz) ============ */
   async fetchSeguidores(){
     if(this._segLoading) return;
@@ -1617,9 +1642,13 @@ class Component extends DCLogic {
     const num=(s)=>{ s=String(s||'').trim(); if(!s) return 0; if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.'); const v=parseFloat(s.replace(/[^0-9.\-]/g,'')); return isNaN(v)?0:v; };
     const clean=(s)=>{ const t=String(s||'').replace(/^\s*(Post do Instagram|Instagram post|Publicação do Instagram|Instagram Post|Instagram Profile Visits Ad|Instagram Mixed Goals[^:]*)\s*:\s*/i,'').trim(); return t||String(s||'').trim(); };
     try{
+      // Fonte dos arquivos: descoberta automática da pasta (se houver chave) ou lista fixa.
+      let sheetIds = this.SEG_SHEETS;
+      const discovered = await this.listDriveFolder(this.SEG_FOLDER);
+      if(discovered.length){ sheetIds = discovered.map(f=>f.id); }
       // acc[dia][nome] — agrega cada publicação turbinada por DIA (coluna "Day")
       const acc={};
-      await Promise.all(this.SEG_SHEETS.map(async(id)=>{
+      await Promise.all(sheetIds.map(async(id)=>{
         try{
           const url='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
           const r=await fetch(url,{cache:'no-store'}); if(!r.ok) return;
