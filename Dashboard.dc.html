@@ -92,13 +92,17 @@
       </div>
     </div>
 
-    <div style="max-width:1280px; margin:0 auto; padding:0 32px 14px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap;">
-      <nav style="display:flex; gap:4px;">
+    <div style="max-width:1280px; margin:0 auto; padding:0 32px 14px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;">
+      <nav style="display:flex; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:nowrap; overflow:hidden;">
         <sc-for list="{{ pages }}" as="p" hint-placeholder-count="3">
           <button onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</button>
         </sc-for>
       </nav>
-      <div style="display:flex; align-items:flex-end; gap:12px;">
+      <div style="display:flex; align-items:flex-end; gap:12px; flex:0 0 auto;">
+        <div style="display:flex; gap:6px; padding-bottom:3px;">
+          <button onClick="{{ navPrev }}" aria-label="Página anterior" title="Página anterior" style="{{ navArrowStyle }}">‹</button>
+          <button onClick="{{ navNext }}" aria-label="Próxima página" title="Próxima página" style="{{ navArrowStyle }}">›</button>
+        </div>
         <sc-if value="{{ showFilters }}" hint-placeholder-val="{{ true }}">
         <label style="display:flex; flex-direction:column; gap:4px;">
           <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Mês</span>
@@ -1263,17 +1267,20 @@ class Component extends DCLogic {
     const pages=[{key:'conta',label:'Dados da Conta'},{key:'conteudos',label:'Dados dos Conteúdos'},{key:'insights',label:'Insights dos Conteúdos'},{key:'candidaturas',label:'Dados das Campanhas'}].map(p=>({
       label:p.label,
       onClick:()=>this.setPage(p.key),
-      style:`font-family:var(--font-sans); font-size:13px; font-weight:${S.page===p.key?'600':'500'}; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid ${S.page===p.key?'var(--border-soft)':'transparent'}; border-bottom:2px solid ${S.page===p.key?accent:'transparent'}; background:${S.page===p.key?'var(--surface-page)':'transparent'}; color:${S.page===p.key?'var(--text-strong)':'var(--text-muted)'};`
+      style:`white-space:nowrap; flex:0 0 auto; font-family:var(--font-sans); font-size:13px; font-weight:${S.page===p.key?'600':'500'}; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid ${S.page===p.key?'var(--border-soft)':'transparent'}; border-bottom:2px solid ${S.page===p.key?accent:'transparent'}; background:${S.page===p.key?'var(--surface-page)':'transparent'}; color:${S.page===p.key?'var(--text-strong)':'var(--text-muted)'};`
     }));
     pages.push({
       label:'Painel de Performance',
       onClick:()=>window.open('https://cursos.pririciardi.com.br/painel-performance/','_blank','noopener'),
-      style:`font-family:var(--font-sans); font-size:13px; font-weight:500; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid transparent; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted);`
+      style:`white-space:nowrap; flex:0 0 auto; font-family:var(--font-sans); font-size:13px; font-weight:500; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid transparent; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted);`
     });
 
     const base={
       brand:M.profile, lastSync:S.lastSync, refreshing:S.refreshing, refreshLabel: S.refreshing?'Atualizando…':'Atualizar',
       onRefresh:()=>this.onRefresh(),
+      navPrev:()=>{ const o=['conta','conteudos','insights','candidaturas']; const i=o.indexOf(S.page); this.setPage(o[(i-1+o.length)%o.length]); },
+      navNext:()=>{ const o=['conta','conteudos','insights','candidaturas']; const i=o.indexOf(S.page); this.setPage(o[(i+1)%o.length]); },
+      navArrowStyle:'display:flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; cursor:pointer; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:transparent; color:var(--text-body); font-family:var(--font-sans); font-size:15px; line-height:1;',
       sourceLabel: S.dataError? ('erro: '+S.dataError).slice(0,58) : (S.mediaLoading? ('ao vivo · @'+M.profile.handle+' · carregando dados…') : (S.refreshing? 'buscando dados ao vivo…' : (S.live? ('ao vivo · @'+M.profile.handle) : 'snapshot de demonstração'))),
       sourceColor: S.dataError? 'var(--danger)' : (S.mediaLoading? 'var(--warning)' : (S.live? 'var(--success)' : 'var(--ink-300)')),
       dormant: S.dormant && !S.mediaLoading,
