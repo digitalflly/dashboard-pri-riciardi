@@ -693,6 +693,8 @@ class Component extends DCLogic {
       '2026-05':'1hT8vNze0tJOT8BWdYbWmg3XmXsKBmupYoEpyIkhkgxQ',
       '2026-06':'1u9bCx3FFJeIGDvEnFS-QIGItcav3Ew5a4A4LAhSODS0',
     };
+    // Pasta pública das vendas no Drive — descoberta automática (pega meses novos e arquivos re-subidos).
+    this.SALES_FOLDER = '1C0np21KoyJAn6u4rMXrrZm3mGRu78siR';
     // ID do produto Eduzz -> aba (produto). Demais produtos são ignorados.
     this.SALES_PROD_TAB = {
       '2801428':'wa','2847568':'wa','2567496':'wa','2801444':'wa','2987395':'wa',
@@ -700,7 +702,7 @@ class Component extends DCLogic {
       '2696694':'ciclo','2741885':'ciclo','2749859':'ciclo','2825927':'ciclo','2920051':'ciclo','2839425':'ciclo',
       '2854310':'essencia',
     };
-    this.SALES_CKEY = 'priSales:v6';
+    this.SALES_CKEY = 'priSales:v7';
     // produtos (abas da página dados das campanhas) — só os botões por enquanto
     this.CAMPAIGNS = [
       { key:'wa', name:"Woman's Academy" },
@@ -1604,14 +1606,23 @@ class Component extends DCLogic {
       const curYM=now.toISOString().slice(0,7);
       const day=now.getDate();
       const prevYM=new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString().slice(0,7);
+      // Fonte dos arquivos: descoberta automática da pasta (pega meses novos e IDs re-subidos) + fallback fixo.
+      let sheets = Object.assign({}, this.SALES_SHEETS);
+      const discovered = await this.listDriveFolder(this.SALES_FOLDER);
+      if(discovered.length){
+        const MES={janeiro:'01',fevereiro:'02','março':'03',marco:'03',abril:'04',maio:'05',junho:'06',julho:'07',agosto:'08',setembro:'09',outubro:'10',novembro:'11',dezembro:'12'};
+        const disc={};
+        discovered.forEach(f=>{ const m=String(f.name||'').toLowerCase().match(/([a-zç]+)[-_ ](\d{4})/); if(m && MES[m[1]]) disc[m[2]+'-'+MES[m[1]]]=f.id; });
+        if(Object.keys(disc).length) sheets = Object.assign(sheets, disc);
+      }
       let cache={}; try{ cache=JSON.parse(localStorage.getItem(this.SALES_CKEY)||'{}'); }catch(e){}
       const sales={};
-      for(const ym of Object.keys(this.SALES_SHEETS)){
+      for(const ym of Object.keys(sheets)){
         const cached = cache[ym] && Array.isArray(cache[ym]);
         const fresh = (ym===curYM) || (day<=7 && ym===prevYM) || !cached;
         if(!fresh){ sales[ym]=cache[ym]; continue; }
         try{
-          const url='https://docs.google.com/spreadsheets/d/'+this.SALES_SHEETS[ym]+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
+          const url='https://docs.google.com/spreadsheets/d/'+sheets[ym]+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
           const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
           const agg=this.aggregateSales(this.parseCSV(await r.text()));
           sales[ym]=agg; cache[ym]=agg;
