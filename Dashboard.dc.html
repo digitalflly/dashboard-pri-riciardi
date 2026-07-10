@@ -326,33 +326,43 @@
       </div>
       </sc-if>
 
-      <!-- worked / not worked -->
+      <!-- replicar / repensar -->
       <sc-if value="{{ metricsAvailable }}" hint-placeholder-val="{{ true }}">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="b-card" style="padding:22px 24px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
             <span style="width:9px; height:9px; border-radius:999px; background:var(--success);"></span>
-            <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:19px; color:var(--text-strong);">O que funcionou</div>
+            <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:19px; color:var(--text-strong);">Vale replicar</div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:14px;">
-            <sc-for list="{{ worked }}" as="w" hint-placeholder-count="4">
-              <div style="border-left:2px solid var(--success); padding-left:12px;">
-                <div style="font-size:13px; font-weight:600; color:var(--text-strong); line-height:1.35;">{{ w.title }}</div>
-                <div style="font-size:12.5px; color:var(--text-body); line-height:1.45; margin-top:3px;">{{ w.detail }}</div>
+          <div data-keepcase="1" style="font-size:12px; color:var(--text-muted); line-height:1.45; margin-bottom:12px;">Melhores conteúdos do período — repita o formato.</div>
+          <div style="display:flex; flex-direction:column;">
+            <sc-for list="{{ replicar }}" as="c" hint-placeholder-count="5">
+              <div style="display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-top:1px solid var(--border-soft);">
+                <div style="flex:0 0 auto; width:22px; font-family:var(--font-sans); font-size:14px; font-weight:600; color:var(--success); line-height:1.3; padding-top:1px;">{{ c.rank }}</div>
+                <div style="flex:1 1 auto; min-width:0;">
+                  <div data-keepcase="1" style="font-size:13px; font-weight:600; color:var(--text-strong); line-height:1.35;">{{ c.caption }}</div>
+                  <div style="font-size:11.5px; color:var(--text-muted); margin-top:3px;">{{ c.meta }}</div>
+                  <div style="font-size:12px; color:var(--text-body); line-height:1.5; margin-top:6px;">{{ c.note }}</div>
+                </div>
               </div>
             </sc-for>
           </div>
         </div>
         <div class="b-card" style="padding:22px 24px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
             <span style="width:9px; height:9px; border-radius:999px; background:var(--danger);"></span>
-            <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:19px; color:var(--text-strong);">O que não funcionou</div>
+            <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:19px; color:var(--text-strong);">Repensar</div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:14px;">
-            <sc-for list="{{ notWorked }}" as="w" hint-placeholder-count="4">
-              <div style="border-left:2px solid var(--danger); padding-left:12px;">
-                <div style="font-size:13px; font-weight:600; color:var(--text-strong); line-height:1.35;">{{ w.title }}</div>
-                <div style="font-size:12.5px; color:var(--text-body); line-height:1.45; margin-top:3px;">{{ w.detail }}</div>
+          <div data-keepcase="1" style="font-size:12px; color:var(--text-muted); line-height:1.45; margin-bottom:12px;">Conteúdos mais fracos — revise antes de repetir.</div>
+          <div style="display:flex; flex-direction:column;">
+            <sc-for list="{{ repensar }}" as="c" hint-placeholder-count="5">
+              <div style="display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-top:1px solid var(--border-soft);">
+                <div style="flex:0 0 auto; width:22px; font-family:var(--font-sans); font-size:14px; font-weight:600; color:var(--danger); line-height:1.3; padding-top:1px;">{{ c.rank }}</div>
+                <div style="flex:1 1 auto; min-width:0;">
+                  <div data-keepcase="1" style="font-size:13px; font-weight:600; color:var(--text-strong); line-height:1.35;">{{ c.caption }}</div>
+                  <div style="font-size:11.5px; color:var(--text-muted); margin-top:3px;">{{ c.meta }}</div>
+                  <div style="font-size:12px; color:var(--text-body); line-height:1.5; margin-top:6px;">{{ c.note }}</div>
+                </div>
               </div>
             </sc-for>
           </div>
@@ -956,6 +966,7 @@ class Component extends DCLogic {
   /* ============ FORMAT ============ */
   fmtNum(n){ if(n==null||isNaN(n)) return '—'; return new Intl.NumberFormat('pt-BR').format(Math.round(n)); }
   fmtPct(n){ if(n==null||isNaN(n)||!isFinite(n)) return '—'; return n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%'; }
+  fmtX(r){ if(r==null||isNaN(r)||!isFinite(r)) return '—'; return (r>=10? Math.round(r) : r.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}))+'×'; }
   delta(cur,prev){ if(prev==null||prev===0) return {text:'—', color:'var(--ink-300)', sub:''}; const v=(cur-prev)/prev*100; const up=v>=0; return { text:(up?'▲ ':'▼ ')+this.fmtPct(Math.abs(v)), color: up?'var(--success)':'var(--danger)', sub:'' }; }
 
   /* ============ HANDLERS ============ */
@@ -970,18 +981,22 @@ class Component extends DCLogic {
     const to=new Date();
     const fd=(d)=>this.ymd(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));
     const getF=async(fields, days)=>{ const f0=fd(new Date(to.getTime()-days*86400000)); const u='https://connectors.windsor.ai/instagram?api_key='+encodeURIComponent(key)+'&date_from='+f0+'&date_to='+fd(to)+'&fields='+encodeURIComponent(fields)+'&_cb='+Date.now(); const r=await fetch(u, {cache:'no-store'}); if(!r.ok) throw new Error('Windsor HTTP '+r.status); const j=await r.json(); const arr=(j&&j.data)?j.data:(Array.isArray(j)?j:[]); return arr.filter(x=>String(x.username||'').toLowerCase()===H); };
+    // busca por intervalo explícito (para semear publicações em blocos, evitando 1 request gigante)
+    const getFR=async(fields, fromD, toD)=>{ const u='https://connectors.windsor.ai/instagram?api_key='+encodeURIComponent(key)+'&date_from='+fd(fromD)+'&date_to='+fd(toD)+'&fields='+encodeURIComponent(fields)+'&_cb='+Date.now(); const r=await fetch(u, {cache:'no-store'}); if(!r.ok) throw new Error('Windsor HTTP '+r.status); const j=await r.json(); const arr=(j&&j.data)?j.data:(Array.isArray(j)?j:[]); return arr.filter(x=>String(x.username||'').toLowerCase()===H); };
     const num=(v)=> (v==null||v==='')?0:(+v||0);
     const isDate=(s)=>/^\d{4}-\d{2}-\d{2}$/.test(s);
     try{
       // ── Phase 1: account + daily (fast) → Conta page goes live quickly ──
+      // série diária desde 01/set/2025 até hoje
+      const SINCE = Math.ceil((to.getTime() - Date.UTC(2025,8,1)) / 86400000);
       const [profR,dRows,fRows]=await Promise.all([
         getF('followers_count,name,username,media_count', 7),
-        getF('date,views,reach,total_interactions,shares,likes,comments,saves,profile_links_taps,username', 60),
-        getF('date,follows_and_unfollows,username', 60),
+        getF('date,views,reach,total_interactions,shares,likes,comments,saves,profile_links_taps,username', SINCE),
+        getF('date,follows_and_unfollows,username', SINCE),
       ]);
       const daily=dRows.map(r=>({ date:String(r.date).slice(0,10), views:num(r.views), reach:num(r.reach), interactions:num(r.total_interactions), taps:(r.profile_links_taps==null?null:num(r.profile_links_taps)), shares:num(r.shares), likes:num(r.likes), comments:num(r.comments), saves:num(r.saves) }))
         .filter(r=>isDate(r.date)).sort((a,b)=> a.date<b.date?-1:1);
-      if(daily.length<2) throw new Error('Sem série diária suficiente para @'+H+' nesse período.');
+      if(daily.length<2){ this.setState({ refreshing:false, mediaLoading:false, dataError:'' }); return; }
       const fmap={}; fRows.forEach(r=>{ const d=String(r.date).slice(0,10); if(isDate(d)) fmap[d]=(r.follows_and_unfollows==null?null:num(r.follows_and_unfollows)); });
       const follows=daily.map(d=>({ date:d.date, net:(d.date in fmap)?fmap[d.date]:0 }));
       const prof=profR[0]||{}; let nm=String(prof.name||('@'+H)).trim();
@@ -996,13 +1011,27 @@ class Component extends DCLogic {
       // ── Phase 2: per-post insights — só os últimos 30 dias são buscados; o
       //    histórico anterior fica estático em cache (localStorage). ──
       try{
-        const CKEY='dbi_posts_cache_'+H;
+        const CKEY='dbi_posts_cache_v2_'+H;
         // cache existente (histórico já salvo)
         let cached=[]; let seeded=false;
         try{ const raw=localStorage.getItem(CKEY); if(raw){ const o=JSON.parse(raw); if(o&&Array.isArray(o.posts)){ cached=o.posts; seeded=o.posts.length>0; } } }catch(_){}
-        // 1ª vez (sem cache): semeia o histórico disponível; depois só 30 dias
-        const win = seeded ? 30 : 180;
-        const mRows=await getF('media_id,timestamp,media_type,media_product_type,media_caption,media_like_count,media_comments_count,media_reach,media_saved,media_shares,media_views,media_url,media_thumbnail_url,username', win);
+        // 1ª vez (sem cache): semeia o histórico desde set/2025 em blocos de ~45 dias
+        // (um único request gigante trava a API); depois só 30 dias num request só
+        const MFIELDS='media_id,timestamp,media_type,media_product_type,media_caption,media_like_count,media_comments_count,media_reach,media_saved,media_shares,media_views,media_url,media_thumbnail_url,username';
+        let mRows=[];
+        if(seeded){
+          mRows=await getF(MFIELDS, 30);
+        }else{
+          const start=new Date(Date.UTC(2025,8,1));
+          const STEP=45*86400000;
+          const jobs=[];
+          for(let s=start.getTime(); s<=to.getTime(); s+=STEP){
+            const a=new Date(s), b=new Date(Math.min(s+STEP-86400000, to.getTime()));
+            jobs.push(getFR(MFIELDS, a, b).catch(()=>[]));
+          }
+          const parts=await Promise.all(jobs);
+          parts.forEach(p=>{ mRows=mRows.concat(p); });
+        }
         const fresh=mRows.map((r,i)=>{ const likes=num(r.media_like_count),comments=num(r.media_comments_count),shares=num(r.media_shares),saves=num(r.media_saved); const reach=num(r.media_reach), views=num(r.media_views); const eng=num(r.media_engagement)||(likes+comments+shares+saves); const type=(r.media_product_type==='REELS')?'REELS':(r.media_type||'IMAGE'); return { id:r.media_id||null, ts:String(r.timestamp||'').slice(0,10), type, likes,comments,shares,saves, views, reach, eng, caption:String(r.media_caption||'Sem legenda').replace(/\s+/g,' ').trim().slice(0,140), coverIdx:i, cover:String(r.media_thumbnail_url||r.media_url||''), thumb:String(r.media_thumbnail_url||r.media_url||'') }; })
           .filter(p=>isDate(p.ts) && p.id);
         // corte de 30 dias: cache fornece tudo anterior, fetch fornece os últimos 30 dias
@@ -1393,14 +1422,14 @@ class Component extends DCLogic {
       coverStyle:`width:56px; height:56px; flex:none; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; background:${this.COVER_BG[p.coverIdx%this.COVER_BG.length]};`
     }));
 
-    const { worked, notWorked } = this.learnings(valid, followers);
+    const { replicar, repensar } = this.learnings(valid, followers);
 
     return { ...base,
       kpis, metric2:S.metric2, metric2Options, onMetric2:(e)=>this.setState({metric2:e.target.value}),
       posted, tests, postedCount:String(posted.length), testCount:String(tests.length),
       hasPosted:posted.length>0, hasTest:tests.length>0, contentEmpty: posted.length===0 && tests.length===0,
       averages, top3, topMetric:S.topMetric, topMetricOptions, onTopMetric:(e)=>this.setState({topMetric:e.target.value}),
-      worked, notWorked,
+      replicar, repensar,
       metricsAvailable: PM, noMetrics: !PM,
       avgEyebrow: PM? 'Média por post no período' : 'Média diária no período',
       avgTitle: PM? 'Desempenho médio' : 'Desempenho médio diário',
@@ -1829,32 +1858,43 @@ class Component extends DCLogic {
   }
 
   learnings(valid, followers){
-    if(valid.length<2) return { worked:[{title:'Dados insuficientes', detail:'Selecione um período com mais conteúdos publicados para gerar aprendizados.'}], notWorked:[{title:'Dados insuficientes', detail:'Sem posts suficientes para comparar.'}] };
-    const avgReach = valid.reduce((a,p)=>a+p.reach,0)/valid.length;
+    const q=(s)=>'“'+s+'”';
+    const empty=(txt)=>[{rank:'—', caption:'Dados insuficientes', meta:'', note:txt}];
+    if(valid.length<2) return { replicar:empty('Selecione um período com mais conteúdos publicados para gerar a análise.'), repensar:empty('Sem posts suficientes para comparar.') };
     const rate=(p)=>p.reach?p.eng/p.reach*100:0;
     const sRate=(p)=>p.reach?p.saves/p.reach*100:0;
-    const avgRate = valid.reduce((a,p)=>a+rate(p),0)/valid.length;
-    const by=(f)=>valid.slice().sort((a,b)=>f(b)-f(a));
-    const maxReach=by(p=>p.reach)[0], minReach=by(p=>p.reach)[valid.length-1];
-    const maxShare=by(p=>p.shares)[0];
-    const maxSave=by(sRate)[0], minSave=by(sRate)[valid.length-1];
-    const maxEng=by(rate)[0], maxComment=by(p=>p.comments)[0];
-    const highReachLowEng=by(p=>p.reach).find(p=> rate(p)<avgRate);
-    const q=(s)=>'“'+s+'”';
-    const worked=[
-      {title:'Maior alcance do período', detail:q(maxReach.caption)+' alcançou '+this.fmtNum(maxReach.reach)+' contas — '+this.fmtPct((maxReach.reach/avgReach-1)*100)+' acima da média. Repita o formato e o tema.'},
-      {title:'Mais compartilhado', detail:q(maxShare.caption)+' teve '+this.fmtNum(maxShare.shares)+' compartilhamentos. Conteúdo que as pessoas enviam para amigos amplia alcance — vale uma sequência.'},
-      {title:'Melhor taxa de salvamento', detail:q(maxSave.caption)+' salvou '+this.fmtPct(sRate(maxSave))+' do alcance. Sinal de conteúdo de referência; transforme em carrossel salvável.'},
-      {title:'Mais engajante', detail:q(maxEng.caption)+' converteu '+this.fmtPct(rate(maxEng))+' do alcance em interações. Use a mesma abertura nos próximos posts.'},
-      {title:'Gerou conversa', detail:q(maxComment.caption)+' recebeu '+this.fmtNum(maxComment.comments)+' comentários. Perguntas na legenda funcionam — mantenha o convite à resposta.'},
-    ];
-    const notWorked=[
-      {title:'Menor alcance do período', detail:q(minReach.caption)+' atingiu apenas '+this.fmtNum(minReach.reach)+' contas, '+this.fmtPct((1-minReach.reach/avgReach)*100)+' abaixo da média. Revise horário e gancho inicial.'},
-      {title:'Pior taxa de salvamento', detail:q(minSave.caption)+' salvou só '+this.fmtPct(sRate(minSave))+' do alcance. Faltou valor prático para guardar; adicione um "porquê salvar".'},
-    ];
-    if(highReachLowEng){ notWorked.push({title:'Alcançou muito, engajou pouco', detail:q(highReachLowEng.caption)+' chegou a '+this.fmtNum(highReachLowEng.reach)+' contas mas só '+this.fmtPct(rate(highReachLowEng))+' interagiram. O tema atrai, mas a chamada para ação precisa ser mais clara.'}); }
-    notWorked.push({title:'Abaixo da média de interação', detail:'Posts com taxa inferior a '+this.fmtPct(avgRate)+' puxam a média para baixo. Concentre esforço nos formatos que já performam.'});
-    return { worked, notWorked };
+    const shRate=(p)=>p.reach?p.shares/p.reach*100:0;
+    const avgReach=valid.reduce((a,p)=>a+p.reach,0)/valid.length || 1;
+    const avgRate=valid.reduce((a,p)=>a+rate(p),0)/valid.length || 1;
+    const avgSave=valid.reduce((a,p)=>a+sRate(p),0)/valid.length || 1;
+    const avgShare=valid.reduce((a,p)=>a+shRate(p),0)/valid.length || 1;
+    const score=(p)=> 0.5*(p.reach/avgReach) + 0.5*(rate(p)/avgRate);
+    const ranked=valid.slice().sort((a,b)=>score(b)-score(a));
+    const meta=(p)=> this.fmtNum(p.reach)+' de alcance · '+this.fmtPct(rate(p))+' de engajamento';
+    // identifica a dimensão que mais destoa da média e explica o porquê
+    const noteGood=(p)=>{
+      const dims=[
+        {k:'saves',  x:sRate(p)/avgSave,  t:this.fmtNum(p.saves)+' salvamentos ('+this.fmtX(sRate(p)/avgSave)+' a média): conteúdo que o público quis guardar pra depois.'},
+        {k:'shares', x:shRate(p)/avgShare,t:this.fmtNum(p.shares)+' compartilhamentos ('+this.fmtX(shRate(p)/avgShare)+' a média): gerou identificação, mandaram pra alguém.'},
+        {k:'reach',  x:p.reach/avgReach,  t:'Alcance '+this.fmtPct((p.reach/avgReach-1)*100)+' acima da média: o tema circulou além dos seguidores.'},
+        {k:'rate',   x:rate(p)/avgRate,   t:'Engajamento de '+this.fmtPct(rate(p))+' (média '+this.fmtPct(avgRate)+'): prendeu quem viu.'},
+      ].filter(d=>d.x>=1.1).sort((a,b)=>b.x-a.x);
+      return dims.length? dims[0].t : 'Desempenho equilibrado, acima da média do período.';
+    };
+    const noteBad=(p)=>{
+      const dims=[
+        {k:'reach', x:p.reach/avgReach, t:'Alcance '+this.fmtPct((1-p.reach/avgReach)*100)+' abaixo da média: poucos viram — tema ou horário não circularam.'},
+        {k:'rate',  x:rate(p)/avgRate,  t:'Engajamento de só '+this.fmtPct(rate(p))+' (média '+this.fmtPct(avgRate)+'): viram, mas não pararam — gancho ou CTA fracos.'},
+        {k:'saves', x:sRate(p)/avgSave, t:'Quase sem salvamentos: faltou valor prático pra guardar.'},
+        {k:'shares',x:shRate(p)/avgShare,t:'Poucos compartilhamentos: não gerou identificação suficiente pra mandar adiante.'},
+      ].filter(d=>d.x<0.9).sort((a,b)=>a.x-b.x);
+      return dims.length? dims[0].t : 'Métricas abaixo da média, sem um ponto que se destaque.';
+    };
+    const top=ranked.slice(0, Math.min(5, Math.ceil(ranked.length/2)));
+    const bottom=ranked.slice(top.length).slice(-5).reverse(); // pior primeiro, sem repetir os do topo
+    const replicar=top.map((p,i)=>({ rank:String(i+1).padStart(2,'0'), caption:q(p.caption), meta:meta(p), note:noteGood(p) }));
+    const repensar=bottom.map((p,i)=>({ rank:String(i+1).padStart(2,'0'), caption:q(p.caption), meta:meta(p), note:noteBad(p) }));
+    return { replicar, repensar };
   }
 }
 </script>
