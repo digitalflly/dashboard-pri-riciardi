@@ -447,6 +447,14 @@
         </sc-if>
         </sc-if>
 
+        <sc-if value="{{ segDailyShow }}" hint-placeholder-val="{{ false }}">
+        <div class="b-card" style="padding:22px 24px; margin-bottom:16px;">
+          <div style="font-size:11px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Por dia</div>
+          <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:18px; color:var(--text-strong); line-height:1.15; margin-bottom:12px;">Novos seguidores e custo por seguidor</div>
+          <div style="height:252px; position:relative;"><canvas id="seg-daily"></canvas></div>
+        </div>
+        </sc-if>
+
         <sc-if value="{{ investShow }}" hint-placeholder-val="{{ false }}">
         <div style="border-top:1px solid var(--border-soft); margin:26px 0 18px; padding-top:24px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
           <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:22px; color:var(--text-strong);">Investimento em tráfego pago</div>
@@ -1523,20 +1531,20 @@ class Component extends DCLogic {
       return { funnelTabs, candFilters, candStatusBtns:[], candReady:false, candLoadingView:true,
         ...this.investFunnel(S.campaign), ...this.salesInfo(S.campaign),
         candStatusLabel: S.salesError? ('erro ao ler as vendas: '+S.salesError).slice(0,90) : (S.adsError? ('erro nos anúncios: '+S.adsError).slice(0,90) : 'carregando dados…'),
-        candKpis:[], candStatus:[], candCharts:[] };
+        segDailyShow:false, candKpis:[], candStatus:[], candCharts:[] };
     }
     this._funnelCfgs={};
     const sales=this.salesInfo(S.campaign);
     const inv=this.investFunnel(S.campaign);
     return { funnelTabs, candFilters, candStatusBtns:[], candReady:true, candLoadingView:false,
       ...sales, candStatusLabel:'',
-      volEyebrow:'Por dia', volTitle:'', candKpis:[], candStatus:[], candCharts:[], ...inv };
+      volEyebrow:'Por dia', volTitle:'', segDailyShow:false, candKpis:[], candStatus:[], candCharts:[], ...inv };
   }
 
   // Investimento da campanha — Facebook Ads (por produto: WA/Reset/Ciclo/Essência).
   investFunnel(key, total){
     if(key==='seguidores') return this.followerFunnel();
-    if(!this.ADS_CAMPAIGN_MATCH[key]){ return { investShow:false, segMode:false, showAdsets:false, showAds:false, investStages:[], investStats:[], investAds:[], investAdsets:[], investPubs:[], investEyebrow:'', adsStatus:'' }; }
+    if(!this.ADS_CAMPAIGN_MATCH[key]){ return { investShow:false, segMode:false, showAdsets:false, showAds:false, segDailyShow:false, investStages:[], investStats:[], investAds:[], investAdsets:[], investPubs:[], investEyebrow:'', adsStatus:'' }; }
     const money2=(v)=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     const S=this.state;
     // respeita os filtros de mês / intervalo de datas da página
@@ -1854,7 +1862,46 @@ class Component extends DCLogic {
     let budgetItems=pubs.filter(p=>p.spend>0).map(p=>({label:p.name, count:p.spend})).sort((a,b)=>b.count-a.count);
     if(budgetItems.length>10){ const top=budgetItems.slice(0,9); const rest=budgetItems.slice(9).reduce((a,x)=>a+x.count,0); top.push({label:'Outros', count:rest}); budgetItems=top; }
     if(this._funnelCfgs){ this._funnelCfgs['seg-budget']=this.doughnutCfg(budgetItems, {money:true}); }
-    return { investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus };
+    // combo diário: barras = seguidores/dia (turbinamento), linha = custo por seguidor/dia
+    const dayAgg={};
+    Object.keys(SEG).forEach(k=>{ const day = k.length>7 ? k : (k+'-01'); if(!inRange(day)) return;
+      SEG[k].forEach(r=>{ if(!dayAgg[day]) dayAgg[day]={spend:0, follows:0}; dayAgg[day].spend+=r[1]; dayAgg[day].follows+=r[5]; }); });
+    const segDays=Object.keys(dayAgg).sort();
+    const segDailyShow = segDays.length>0;
+    if(this._funnelCfgs && segDailyShow){
+      const labels=segDays.map(d=>this.ddmm(d));
+      const bars=segDays.map(d=>dayAgg[d].follows);
+      const line=segDays.map(d=>dayAgg[d].follows? dayAgg[d].spend/dayAgg[d].follows : null);
+      this._funnelCfgs['seg-daily']=this.segDailyCfg(labels, bars, line);
+    }
+    return { investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, segDailyShow, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus };
+  }
+
+  // gráfico combinado: barras (seguidores/dia) + linha (custo por seguidor/dia), com eixo Y duplo
+  segDailyCfg(labels, bars, line){
+    return {
+      type:'bar',
+      data:{ labels, datasets:[
+        { type:'bar', label:'novos seguidores', data:bars, backgroundColor:'#172219', borderRadius:4, borderSkipped:false, maxBarThickness:30, yAxisID:'y', order:2 },
+        { type:'line', label:'custo por seguidor', data:line, borderColor:'#828F84', backgroundColor:'#828F84', borderWidth:2, tension:0.3, pointRadius:2.5, pointHoverRadius:4, yAxisID:'y1', order:1, spanGaps:true }
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ mode:'index', intersect:false },
+        plugins:{
+          legend:{ display:true, position:'top', align:'end', labels:{ boxWidth:9, boxHeight:9, usePointStyle:true, pointStyle:'rectRounded', font:{family:'Neue Montreal', size:11}, color:'#6B746A' } },
+          tooltip:{ backgroundColor:'#172219', titleColor:'#FFFDF7', bodyColor:'#D8DCD4', borderColor:'#2C3A2E', borderWidth:1, padding:10, cornerRadius:8, titleFont:{family:'Neue Montreal',weight:'600'}, bodyFont:{family:'Neue Montreal'},
+            callbacks:{ label:(c)=> c.dataset.type==='line'
+              ? ' custo/seg: R$ '+((c.parsed.y||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}))
+              : ' seguidores: '+this.fmtNum(c.parsed.y) } }
+        },
+        scales:{
+          x:{ grid:{ display:false }, ticks:{ font:{family:'Neue Montreal', size:10}, color:'#6B746A', maxRotation:0, autoSkip:true, maxTicksLimit:14 } },
+          y:{ beginAtZero:true, position:'left', grid:{ color:'rgba(23,34,25,0.07)' }, ticks:{ font:{family:'Neue Montreal', size:10.5}, color:'#6B746A', callback:(v)=>this.fmtNum(v) }, title:{ display:true, text:'seguidores', font:{family:'Neue Montreal', size:10}, color:'#6B746A' } },
+          y1:{ beginAtZero:true, position:'right', grid:{ display:false }, ticks:{ font:{family:'Neue Montreal', size:10.5}, color:'#828F84', callback:(v)=>'R$ '+(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) }, title:{ display:true, text:'custo/seg', font:{family:'Neue Montreal', size:10}, color:'#828F84' } }
+        }
+      }
+    };
   }
 
   learnings(valid, followers){
