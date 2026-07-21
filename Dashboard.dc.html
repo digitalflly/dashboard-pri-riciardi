@@ -720,11 +720,11 @@ class Component extends DCLogic {
     // ID do produto Eduzz -> aba (produto). Demais produtos são ignorados.
     this.SALES_PROD_TAB = {
       '2801428':'wa','2847568':'wa','2567496':'wa','2801444':'wa','2987395':'wa',
-      '2954846':'reset','3018377':'reset','2882902':'reset',
+      '2954846':'reset','3018377':'reset','2882902':'reset','3065286':'reset',
       '2696694':'ciclo','2741885':'ciclo','2749859':'ciclo','2825927':'ciclo','2920051':'ciclo','2839425':'ciclo',
       '2854310':'essencia',
     };
-    this.SALES_CKEY = 'priSales:v7';
+    this.SALES_CKEY = 'priSales:v8';
     // produtos (abas da página dados das campanhas) — só os botões por enquanto
     this.CAMPAIGNS = [
       { key:'wa', name:"Woman's Academy" },
@@ -1660,10 +1660,15 @@ class Component extends DCLogic {
         if(Object.keys(disc).length) sheets = Object.assign(sheets, disc);
       }
       let cache={}; try{ cache=JSON.parse(localStorage.getItem(this.SALES_CKEY)||'{}'); }catch(e){}
+      const savedIds = (cache.__ids && typeof cache.__ids==='object') ? cache.__ids : {};
+      const newIds = {};
       const sales={};
       for(const ym of Object.keys(sheets)){
         const cached = cache[ym] && Array.isArray(cache[ym]);
-        const fresh = (ym===curYM) || (day<=7 && ym===prevYM) || !cached;
+        // arquivo re-subido = ID diferente do que lemos da última vez → força releitura desse mês
+        const idChanged = savedIds[ym] !== sheets[ym];
+        const fresh = (ym===curYM) || (day<=7 && ym===prevYM) || !cached || idChanged;
+        newIds[ym] = sheets[ym];
         if(!fresh){ sales[ym]=cache[ym]; continue; }
         try{
           const url='https://docs.google.com/spreadsheets/d/'+sheets[ym]+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
@@ -1672,6 +1677,7 @@ class Component extends DCLogic {
           sales[ym]=agg; cache[ym]=agg;
         }catch(e){ if(cached) sales[ym]=cache[ym]; }
       }
+      cache.__ids = newIds;
       try{ localStorage.setItem(this.SALES_CKEY, JSON.stringify(cache)); }catch(e){}
       this.setState({salesLoading:false, sales});
     }catch(e){ this.setState({salesLoading:false, salesError:(e&&e.message)||'falha ao ler vendas'}); }
@@ -1741,7 +1747,8 @@ class Component extends DCLogic {
     const out=[];
     rows.slice(1).forEach(r=>{
       if(!r || r.length<37 || !(r[0]||'').trim()) return;
-      const tab=this.SALES_PROD_TAB[(r[16]||'').trim()];
+      const pid=(r[16]||'').trim();
+      const tab=this.SALES_PROD_TAB[pid] || this.salesTabForName(r[17]);
       if(!tab) return; // ignora produtos fora das 4 abas
       out.push({ fatura:(r[0]||'').trim(), status:(r[1]||'').trim(),
         date:this.parseRowDate(r[8])||this.parseRowDate(r[10]), item:num(r[26]), net:num(r[36]), tab,
@@ -1749,6 +1756,17 @@ class Component extends DCLogic {
         utmCamp:(r[51]||'').trim(), utmCont:(r[53]||'').trim() });
     });
     return out;
+  }
+
+  // Classifica um produto pela nomenclatura da Eduzz — pega lotes/edições novos (ID novo) sem precisar mapear à mão.
+  salesTabForName(name){
+    const n=String(name||'').toLowerCase();
+    if(!n) return null;
+    if(/reset/.test(n)) return 'reset';
+    if(/womans?\s*academy|woman's\s*academy|womans-academy|\bwa\b/.test(n)) return 'wa';
+    if(/ess[êe]ncia\s*metab/.test(n)) return 'essencia';
+    if(/ciclo\s*leve|c[íi]clic/.test(n)) return 'ciclo';
+    return null;
   }
 
   // KPIs de vendas para um produto, respeitando o filtro de mês / intervalo da página.
