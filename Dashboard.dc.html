@@ -495,13 +495,13 @@
               <table style="border-collapse:collapse; width:100%; table-layout:fixed;">
                 <thead>
                   <tr style="text-align:right;">
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:left; padding:0 8px 10px 4px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; width:32%;">Conjunto</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Impr.</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">CTR</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS2 }}</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS3 }}</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS4 }}</th>
-                    <th style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:right; padding:0 4px 10px 8px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600;">{{ colS5 }}</th>
+                    <th onClick="{{ sortH.setName }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:left; padding:0 8px 10px 4px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; width:32%; cursor:pointer; user-select:none;">Conjunto{{ caret.nameS }}</th>
+                    <th onClick="{{ sortH.setImpr }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; cursor:pointer; user-select:none;">Impr.{{ caret.imprS }}</th>
+                    <th onClick="{{ sortH.setCtr }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; cursor:pointer; user-select:none;">CTR{{ caret.ctrS }}</th>
+                    <th onClick="{{ sortH.setClk }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; cursor:pointer; user-select:none;">{{ colS2 }}{{ caret.clkS }}</th>
+                    <th onClick="{{ sortH.setLpv }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; cursor:pointer; user-select:none;">{{ colS3 }}{{ caret.lpvS }}</th>
+                    <th onClick="{{ sortH.setCr }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; padding:0 8px 10px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; cursor:pointer; user-select:none;">{{ colS4 }}{{ caret.crS }}</th>
+                    <th onClick="{{ sortH.setLeads }}" style="position:sticky; top:0; background:var(--surface, #fff); z-index:1; text-align:right; padding:0 4px 10px 8px; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:600; cursor:pointer; user-select:none;">{{ colS5 }}{{ caret.leadsS }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -564,13 +564,13 @@
             <table style="border-collapse:collapse; width:100%; min-width:660px;">
               <thead>
                 <tr style="text-align:right;">
-                  <th style="text-align:left; padding:0 12px 10px 4px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Anúncio</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Impressões</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">CTR</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA2 }}</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA3 }}</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA4 }}</th>
-                  <th style="text-align:right; padding:0 4px 10px 12px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">{{ colA5 }}</th>
+                  <th onClick="{{ sortH.adName }}" style="text-align:left; padding:0 12px 10px 4px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Anúncio{{ caret.nameA }}</th>
+                  <th onClick="{{ sortH.adImpr }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Impressões{{ caret.imprA }}</th>
+                  <th onClick="{{ sortH.adCtr }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">CTR{{ caret.ctrA }}</th>
+                  <th onClick="{{ sortH.adClk }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">{{ colA2 }}{{ caret.clkA }}</th>
+                  <th onClick="{{ sortH.adLpv }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">{{ colA3 }}{{ caret.lpvA }}</th>
+                  <th onClick="{{ sortH.adCr }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">{{ colA4 }}{{ caret.crA }}</th>
+                  <th onClick="{{ sortH.adLeads }}" style="text-align:right; padding:0 4px 10px 12px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">{{ colA5 }}{{ caret.leadsA }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -685,6 +685,8 @@ class Component extends DCLogic {
       adsLoading: false,
       adsError: '',
       sales: {},
+      adSort: {col:'',dir:-1},
+      adsetSort: {col:'',dir:-1},
       salesLoading: false,
       salesError: '',
       seg: {},
@@ -1617,7 +1619,11 @@ class Component extends DCLogic {
       const left = convStr ? (s.cost ? convStr+'  -  '+s.cost : convStr) : '';
       return { label:s.label, value:this.fmtNum(s.value), left, barStyle:`width:${widths[i]}%; background:#172219;` };
     });
-    const investAds=ads.slice(0,12).map((a,i)=>({ idx:i, name:a.name, perma:a.perma||'', hasLink:!!a.perma, noLink:!a.perma,
+    const _adSortForList = this.state.adSort||{col:'',dir:-1};
+    const _setSortForList = this.state.adsetSort||{col:'',dir:-1};
+    const _adVal=(a,col)=>{ switch(col){ case 'name':return (a.name||'').toLowerCase(); case 'impr':return a.impressions||0; case 'ctr':return a.impressions? a.linkClicks/a.impressions:0; case 'clk':return isEng?(a.eng||0):(a.linkClicks||0); case 'lpv':return isEng?(a.vv||0):(a.lpViews||0); case 'cr':return isEng?(a.reac||0):(a.linkClicks? a.lpViews/a.linkClicks:0); case 'leads':return isEng?(a.impressions? a.eng/a.impressions:0):(a.leads||0); default:return a.impressions||0; } };
+    const _sortArr=(arr,s)=>{ if(!s||!s.col) return arr; const c=arr.slice(); c.sort((x,y)=>{ const vx=_adVal(x,s.col),vy=_adVal(y,s.col); if(typeof vx==='string') return s.dir*vx.localeCompare(vy,'pt-BR'); return s.dir*(vx-vy); }); return c; };
+    const investAds=_sortArr(ads,_adSortForList).slice(0,12).map((a,i)=>({ idx:i, name:a.name, perma:a.perma||'', hasLink:!!a.perma, noLink:!a.perma,
       thumbStyle: a.thumb? `width:42px; height:42px; flex:none; border-radius:5px; background:#172219 center/cover no-repeat url("${a.thumb}");`
         : `width:42px; height:42px; flex:none; border-radius:5px; background:linear-gradient(135deg, #172219, #2C3A2E);`,
       impr:this.fmtNum(a.impressions),
@@ -1627,7 +1633,7 @@ class Component extends DCLogic {
       cr:isEng? this.fmtNum(a.reac) : this.fmtPct(a.linkClicks? a.lpViews/a.linkClicks*100 : 0),
       leads:isEng? this.fmtPct(a.impressions? a.eng/a.impressions*100 : 0) : this.fmtNum(a.leads) }));
     const adsets=adsetsArr;
-    const investAdsets=adsets.slice(0,30).map((a,i)=>({ idx:i, name:a.name,
+    const investAdsets=_sortArr(adsets,_setSortForList).slice(0,30).map((a,i)=>({ idx:i, name:a.name,
       impr:this.fmtNum(a.impressions),
       ctr:this.fmtPct(a.impressions? a.linkClicks/a.impressions*100 : 0),
       clk:this.fmtNum(isEng? a.eng : a.linkClicks),
@@ -1635,7 +1641,26 @@ class Component extends DCLogic {
       cr:isEng? this.fmtNum(a.reac) : this.fmtPct(a.linkClicks? a.lpViews/a.linkClicks*100 : 0),
       leads:isEng? this.fmtPct(a.impressions? a.eng/a.impressions*100 : 0) : this.fmtNum(a.leads) }));
     const adsStatus = S.adsError? ('Facebook Ads: '+S.adsError).slice(0,80) : (S.adsLoading? 'carregando campanhas do Facebook…' : (hasReal? '' : 'sem dados para esta campanha'));
-    return { investShow:true, segMode:false, showAdsets:true, showAds:true, investStages, investStats, investAds, investAdsets, investPubs:[], investEyebrow, adsStatus,
+    // ordenação clicável das tabelas (conjuntos + anúncios)
+    const adVal=(a,col)=>{ switch(col){
+      case 'name': return (a.name||'').toLowerCase();
+      case 'impr': return a.impressions||0;
+      case 'ctr':  return a.impressions? a.linkClicks/a.impressions : 0;
+      case 'clk':  return isEng? (a.eng||0) : (a.linkClicks||0);
+      case 'lpv':  return isEng? (a.vv||0) : (a.lpViews||0);
+      case 'cr':   return isEng? (a.reac||0) : (a.linkClicks? a.lpViews/a.linkClicks : 0);
+      case 'leads':return isEng? (a.impressions? a.eng/a.impressions : 0) : (a.leads||0);
+      default: return a.impressions||0;
+    } };
+    const applySort=(arr,sort)=>{ if(!sort||!sort.col) return arr; const c=arr.slice(); const d=sort.dir; c.sort((x,y)=>{ const vx=adVal(x,sort.col), vy=adVal(y,sort.col); if(typeof vx==='string') return d*vx.localeCompare(vy,'pt-BR'); return d*(vx-vy); }); return c; };
+    const AS=S.adSort||{col:'',dir:-1}, SS=S.adsetSort||{col:'',dir:-1};
+    const car=(s,col)=> s.col===col ? (s.dir<0?' ↓':' ↑') : '';
+    const caret={ nameA:car(AS,'name'),imprA:car(AS,'impr'),ctrA:car(AS,'ctr'),clkA:car(AS,'clk'),lpvA:car(AS,'lpv'),crA:car(AS,'cr'),leadsA:car(AS,'leads'),
+      nameS:car(SS,'name'),imprS:car(SS,'impr'),ctrS:car(SS,'ctr'),clkS:car(SS,'clk'),lpvS:car(SS,'lpv'),crS:car(SS,'cr'),leadsS:car(SS,'leads') };
+    const mk=(prop,col)=>()=>{ const cur=this.state[prop]||{col:'',dir:-1}; const dir=(cur.col===col)? -cur.dir : (col==='name'?1:-1); this.setState({[prop]:{col,dir}}); };
+    const sortH={ adName:mk('adSort','name'),adImpr:mk('adSort','impr'),adCtr:mk('adSort','ctr'),adClk:mk('adSort','clk'),adLpv:mk('adSort','lpv'),adCr:mk('adSort','cr'),adLeads:mk('adSort','leads'),
+      setName:mk('adsetSort','name'),setImpr:mk('adsetSort','impr'),setCtr:mk('adsetSort','ctr'),setClk:mk('adsetSort','clk'),setLpv:mk('adsetSort','lpv'),setCr:mk('adsetSort','cr'),setLeads:mk('adsetSort','leads') };
+    return { investShow:true, segMode:false, showAdsets:true, showAds:true, investStages, investStats, investAds, investAdsets, investPubs:[], investEyebrow, adsStatus, caret, sortH,
       colA2:colAds[0], colA3:colAds[1], colA4:colAds[2], colA5:colAds[3],
       colS2:colSets[0], colS3:colSets[1], colS4:colSets[2], colS5:colSets[3] };
   }
