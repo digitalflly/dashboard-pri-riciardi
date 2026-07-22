@@ -615,20 +615,22 @@
             <table style="border-collapse:collapse; width:100%; min-width:720px;">
               <thead>
                 <tr style="text-align:right;">
-                  <th style="text-align:left; padding:0 12px 10px 4px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Publicação</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Gasto</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Alcance</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Impressões</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Visitas ao perfil</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Custo / seg.</th>
-                  <th style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Conversão</th>
-                  <th style="text-align:right; padding:0 4px 10px 12px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap;">Seguidores</th>
+                  <th onClick="{{ pubSortH.name }}" style="text-align:left; padding:0 12px 10px 4px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Publicação{{ pubCaret.name }}</th>
+                  <th onClick="{{ pubSortH.lastDay }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Última data{{ pubCaret.lastDay }}</th>
+                  <th onClick="{{ pubSortH.spend }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Gasto{{ pubCaret.spend }}</th>
+                  <th onClick="{{ pubSortH.reach }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Alcance{{ pubCaret.reach }}</th>
+                  <th onClick="{{ pubSortH.impr }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Impressões{{ pubCaret.impr }}</th>
+                  <th onClick="{{ pubSortH.visits }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Visitas ao perfil{{ pubCaret.visits }}</th>
+                  <th onClick="{{ pubSortH.cost }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Custo / seg.{{ pubCaret.cost }}</th>
+                  <th onClick="{{ pubSortH.conv }}" style="padding:0 12px 10px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Conversão{{ pubCaret.conv }}</th>
+                  <th onClick="{{ pubSortH.follows }}" style="text-align:right; padding:0 4px 10px 12px; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; white-space:nowrap; cursor:pointer; user-select:none;">Seguidores{{ pubCaret.follows }}</th>
                 </tr>
               </thead>
               <tbody>
                 <sc-for list="{{ investPubs }}" as="a" hint-placeholder-count="5">
                   <tr style="border-top:1px solid var(--border-soft);">
                     <td style="padding:10px 12px 10px 4px;"><span style="font-size:12.5px; font-weight:500; color:var(--text-strong); white-space:nowrap;">{{ a.name }}</span></td>
+                    <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-muted); white-space:nowrap;">{{ a.lastDay }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.spend }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.reach }}</td>
                     <td data-keepcase="1" style="text-align:right; padding:10px 12px; font-size:13px; color:var(--text-strong); white-space:nowrap;">{{ a.impr }}</td>
@@ -687,6 +689,7 @@ class Component extends DCLogic {
       sales: {},
       adSort: {col:'',dir:-1},
       adsetSort: {col:'',dir:-1},
+      pubSort: {col:'spend',dir:-1},
       salesLoading: false,
       salesError: '',
       seg: {},
@@ -1874,8 +1877,8 @@ class Component extends DCLogic {
     // fallback mensal usa chave "2026-06" → dia representativo "2026-06-01")
     const byName={};
     Object.keys(SEG).forEach(k=>{ const day = k.length>7 ? k : (k+'-01'); if(!inRange(day)) return;
-      SEG[k].forEach(r=>{ const nm=r[0]; if(!byName[nm]) byName[nm]={ name:nm, spend:0, reach:0, impr:0, visits:0, follows:0 };
-        const a=byName[nm]; a.spend+=r[1]; a.reach+=r[2]; a.impr+=r[3]; a.visits+=r[4]; a.follows+=r[5]; }); });
+      SEG[k].forEach(r=>{ const nm=r[0]; if(!byName[nm]) byName[nm]={ name:nm, spend:0, reach:0, impr:0, visits:0, follows:0, lastDay:'' };
+        const a=byName[nm]; a.spend+=r[1]; a.reach+=r[2]; a.impr+=r[3]; a.visits+=r[4]; a.follows+=r[5]; if(day>a.lastDay) a.lastDay=day; }); });
     const pubs=Object.values(byName);
     const sum=(f)=>pubs.reduce((a,x)=>a+(x[f]||0),0);
     const spend=sum('spend'), reach=sum('reach'), impr=sum('impr'), visits=sum('visits'), follows=sum('follows');
@@ -1897,7 +1900,10 @@ class Component extends DCLogic {
       { label:'Custo / seguidor', value:money2(custoSeg) },
       { label:'% conversão visita→seguidor', value:this.fmtPct(conv) },
     ];
-    const investPubs=pubs.slice().sort((a,b)=>b.spend-a.spend).map((p,i)=>({ idx:i, name:p.name,
+    const PS=this.state.pubSort||{col:'spend',dir:-1};
+    const pv=(p,c)=>{ switch(c){ case 'name':return (p.name||'').toLowerCase(); case 'lastDay':return p.lastDay||''; case 'reach':return p.reach||0; case 'impr':return p.impr||0; case 'visits':return p.visits||0; case 'cost':return p.follows? p.spend/p.follows : Infinity; case 'conv':return p.visits? p.follows/p.visits : 0; case 'follows':return p.follows||0; default:return p.spend||0; } };
+    const sortedPubs=pubs.slice().sort((a,b)=>{ const va=pv(a,PS.col),vb=pv(b,PS.col); if(typeof va==='string') return PS.dir*va.localeCompare(vb,'pt-BR'); return PS.dir*(va-vb); });
+    const investPubs=sortedPubs.map((p,i)=>({ idx:i, name:p.name, lastDay:p.lastDay? this.ddmm(p.lastDay) : '—',
       spend:money2(p.spend), reach:this.fmtNum(p.reach), impr:this.fmtNum(p.impr), visits:this.fmtNum(p.visits), follows:this.fmtNum(p.follows),
       cost:p.follows? money2(p.spend/p.follows):'—', conv:p.visits? this.fmtPct(p.follows/p.visits*100):'—' }));
     const adsStatus = pubs.length? '' : 'sem turbinamento no período';
@@ -1917,7 +1923,11 @@ class Component extends DCLogic {
       const line=segDays.map(d=>dayAgg[d].follows? dayAgg[d].spend/dayAgg[d].follows : null);
       this._funnelCfgs['seg-daily']=this.segDailyCfg(labels, bars, line);
     }
-    return { investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, segDailyShow, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus };
+    const carP=(c)=> PS.col===c ? (PS.dir<0?' ↓':' ↑') : '';
+    const pubCaret={ name:carP('name'),lastDay:carP('lastDay'),spend:carP('spend'),reach:carP('reach'),impr:carP('impr'),visits:carP('visits'),cost:carP('cost'),conv:carP('conv'),follows:carP('follows') };
+    const mkP=(c)=>()=>{ const cur=this.state.pubSort||{col:'spend',dir:-1}; const dir=(cur.col===c)? -cur.dir : (c==='name'?1:-1); this.setState({pubSort:{col:c,dir}}); };
+    const pubSortH={ name:mkP('name'),lastDay:mkP('lastDay'),spend:mkP('spend'),reach:mkP('reach'),impr:mkP('impr'),visits:mkP('visits'),cost:mkP('cost'),conv:mkP('conv'),follows:mkP('follows') };
+    return { investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, segDailyShow, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus, pubCaret, pubSortH };
   }
 
   // gráfico combinado: barras (seguidores/dia) + linha (custo por seguidor/dia), com eixo Y duplo
