@@ -718,7 +718,8 @@ class Component extends DCLogic {
       '2026-03':'1uWlk1c7LI5fOgI9LPtfa-pXISjuV_a7KMUJd4RDV2ZI',
       '2026-04':'1WQBIl4YwUJ8zY6bJEkVtLwPF8RBIdFeLg_VwiWWrUOs',
       '2026-05':'1hT8vNze0tJOT8BWdYbWmg3XmXsKBmupYoEpyIkhkgxQ',
-      '2026-06':'1u9bCx3FFJeIGDvEnFS-QIGItcav3Ew5a4A4LAhSODS0',
+      '2026-06':'1lGpQ1TZBJQUUDb5638qcz6kOI0slPxeqg94EI4gU0iE',
+      '2026-07':'1QgMDuc9V-DS60rsrtyw-QYPRTfwKNfRECfrNNtdpa7I',
     };
     // Pasta pública das vendas no Drive — descoberta automática (pega meses novos e arquivos re-subidos).
     this.SALES_FOLDER = '1C0np21KoyJAn6u4rMXrrZm3mGRu78siR';
@@ -748,7 +749,7 @@ class Component extends DCLogic {
       '1uqXzlB1lUvBoa4E_-63GhVQ9y73Xyer6', // abr/2026 (diário)
       '1xy2DkOuR8_l0toER-TjM69wr1yl7I9o6', // mai/2026 (diário)
       '1Fa_HtgQIQqDju_WzN7g-STIlInNKMl2r', // jun/2026 (diário)
-      '1OS0IYUCogBY0QDVDHopVmzlq_SDI0bSr', // jul/2026 (diário)
+      '1DGbTSb526wejyaMs3ZBBXsi-SrCDcR4V', // jul/2026 (diário)
     ];
     // Descoberta automática da pasta do Drive (dispensa manter IDs fixos acima).
     // Cole a chave de API do Google Drive aqui e o dashboard lista a pasta inteira sozinho
@@ -984,7 +985,7 @@ class Component extends DCLogic {
 
   /* ============ HANDLERS ============ */
   setPage(p){ this.setState({page:p}); }
-  onRefresh(){ this.fetchLive(); this.fetchAds(); this.fetchSales(); this.fetchSeguidores(); this.fetchDemographics(true); }
+  onRefresh(){ this.fetchLive(); this.fetchAds(); this.fetchSales(true); this.fetchSeguidores(true); this.fetchDemographics(true); }
   nowStamp(){ const now=new Date(); const MN=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return now.getDate()+' '+MN[now.getMonth()]+' '+now.getFullYear()+' · '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'); }
   nowYMD(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); }
   async fetchLive(){
@@ -1670,7 +1671,7 @@ class Component extends DCLogic {
 
   /* ============ VENDAS (Eduzz) ============ */
   // Cadência: mês atual sempre ao vivo; 1ª semana do mês (dias 1–7) atualiza atual + anterior; resto fica em cache.
-  async fetchSales(){
+  async fetchSales(force){
     if(this.state.salesLoading) return;
     this.setState({salesLoading:true, salesError:''});
     try{
@@ -1681,22 +1682,27 @@ class Component extends DCLogic {
       // Fonte dos arquivos: descoberta automática da pasta (pega meses novos e IDs re-subidos) + fallback fixo.
       let sheets = Object.assign({}, this.SALES_SHEETS);
       const discovered = await this.listDriveFolder(this.SALES_FOLDER);
+      if(!discovered.length) this.setState({salesError:'não consegui listar a pasta do Drive (usando lista fixa)'});
       if(discovered.length){
         const MES={janeiro:'01',fevereiro:'02','março':'03',marco:'03',abril:'04',maio:'05',junho:'06',julho:'07',agosto:'08',setembro:'09',outubro:'10',novembro:'11',dezembro:'12'};
-        const disc={};
-        discovered.forEach(f=>{ const m=String(f.name||'').toLowerCase().match(/([a-zç]+)[-_ ](\d{4})/); if(m && MES[m[1]]) disc[m[2]+'-'+MES[m[1]]]=f.id; });
-        if(Object.keys(disc).length) sheets = Object.assign(sheets, disc);
+        const disc={}, discMod={};
+        discovered.forEach(f=>{ const m=String(f.name||'').toLowerCase().match(/([a-zç]+)[-_ ](\d{4})/); if(m && MES[m[1]]){ const ym=m[2]+'-'+MES[m[1]]; disc[ym]=f.id; discMod[ym]=f.modified||''; } });
+        if(Object.keys(disc).length){ sheets = Object.assign(sheets, disc); this._salesMod=discMod; }
       }
       let cache={}; try{ cache=JSON.parse(localStorage.getItem(this.SALES_CKEY)||'{}'); }catch(e){}
       const savedIds = (cache.__ids && typeof cache.__ids==='object') ? cache.__ids : {};
-      const newIds = {};
+      const savedMod = (cache.__mod && typeof cache.__mod==='object') ? cache.__mod : {};
+      const mods = this._salesMod||{};
+      const newIds = {}; const newMod = {};
       const sales={};
       for(const ym of Object.keys(sheets)){
         const cached = cache[ym] && Array.isArray(cache[ym]);
         // arquivo re-subido = ID diferente do que lemos da última vez → força releitura desse mês
         const idChanged = savedIds[ym] !== sheets[ym];
-        const fresh = (ym===curYM) || (day<=7 && ym===prevYM) || !cached || idChanged;
-        newIds[ym] = sheets[ym];
+        // arquivo editado no Drive (mesmo ID, conteúdo novo) → também força releitura
+        const modChanged = !!mods[ym] && savedMod[ym] !== mods[ym];
+        const fresh = force || (ym===curYM) || (ym===prevYM) || !cached || idChanged || modChanged;
+        newIds[ym] = sheets[ym]; newMod[ym] = mods[ym]||savedMod[ym]||'';
         if(!fresh){ sales[ym]=cache[ym]; continue; }
         try{
           const url='https://docs.google.com/spreadsheets/d/'+sheets[ym]+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
@@ -1705,7 +1711,7 @@ class Component extends DCLogic {
           sales[ym]=agg; cache[ym]=agg;
         }catch(e){ if(cached) sales[ym]=cache[ym]; }
       }
-      cache.__ids = newIds;
+      cache.__ids = newIds; cache.__mod = newMod;
       try{ localStorage.setItem(this.SALES_CKEY, JSON.stringify(cache)); }catch(e){}
       this.setState({salesLoading:false, sales});
     }catch(e){ this.setState({salesLoading:false, salesError:(e&&e.message)||'falha ao ler vendas'}); }
@@ -1719,10 +1725,10 @@ class Component extends DCLogic {
       const out=[]; let pageToken='';
       do{
         const q=encodeURIComponent("'"+folderId+"' in parents and trashed=false");
-        const url='https://www.googleapis.com/drive/v3/files?q='+q+'&key='+encodeURIComponent(this.DRIVE_API_KEY)+'&fields=nextPageToken,files(id,name,mimeType)&pageSize=200&orderBy=name'+(pageToken?('&pageToken='+pageToken):'')+'&_cb='+Date.now();
+        const url='https://www.googleapis.com/drive/v3/files?q='+q+'&key='+encodeURIComponent(this.DRIVE_API_KEY)+'&fields=nextPageToken,files(id,name,mimeType,modifiedTime)&pageSize=200&orderBy=name'+(pageToken?('&pageToken='+pageToken):'')+'&_cb='+Date.now();
         const r=await fetch(url,{cache:'no-store'}); if(!r.ok) return out;
         const j=await r.json();
-        (j.files||[]).forEach(f=>out.push({id:f.id, name:f.name||''}));
+        (j.files||[]).forEach(f=>out.push({id:f.id, name:f.name||'', modified:f.modifiedTime||''}));
         pageToken=j.nextPageToken||'';
       }while(pageToken);
       return out;
@@ -1730,7 +1736,7 @@ class Component extends DCLogic {
   }
 
   /* ============ NOVOS SEGUIDORES (turbinamento — .xlsx do Drive, ao vivo via gviz) ============ */
-  async fetchSeguidores(){
+  async fetchSeguidores(force){
     if(this._segLoading) return;
     this._segLoading=true;
     const num=(s)=>{ s=String(s||'').trim(); if(!s) return 0; if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.'); const v=parseFloat(s.replace(/[^0-9.\-]/g,'')); return isNaN(v)?0:v; };
