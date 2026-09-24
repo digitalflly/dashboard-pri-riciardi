@@ -704,7 +704,7 @@ class Component extends DCLogic {
       essencia:   /ESS[EÊ]NCIA[\s-]*METAB/i,
       engajamento:/ENGAJAMENTO/i,
     };
-    this.ADS_CKEY = 'priAdsCampaigns:v5';
+    this.ADS_CKEY = 'priAdsCampaigns:v6';
     // Vendas (Eduzz) — planilhas mensais públicas no Drive, lidas ao vivo via gviz.
     this.SALES_SHEETS = {
       '2025-05':'1-gOe6ojnzaMAD3MnUijgxr5JdWvcaZUk24zZ-SImWMA',
@@ -1142,7 +1142,7 @@ class Component extends DCLogic {
     this.setState({adsLoading:true, adsError:''});
     try{
       const key=this.WINDSOR_KEY;
-      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,instagram_permalink_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_purchase,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
+      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,instagram_permalink_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_purchase,actions_initiate_checkout,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
       const num=(v)=>(v==null||v==='')?0:(+v||0);
       const acct=this.ADS_ACCOUNT_ID;
       const ymd=(d)=>this.ymd(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));
@@ -1158,8 +1158,8 @@ class Component extends DCLogic {
       const ingest=(store, rows)=>{ rows.forEach(x=>{ const ps=prodsOf(x.campaign); if(!ps.length) return;
         const d=dnorm(x.date), ad=x.ad_name||'(sem nome)';
         ps.forEach(p=>{ const id=p+'|'+d+'|'+ad;
-          if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', perma:x.instagram_permalink_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
-          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_purchase); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; if(!s.perma&&x.instagram_permalink_url) s.perma=x.instagram_permalink_url; }); }); };
+          if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', perma:x.instagram_permalink_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,ic:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
+          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_purchase); s.ic=(s.ic||0)+num(x.actions_initiate_checkout); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; if(!s.perma&&x.instagram_permalink_url) s.perma=x.instagram_permalink_url; }); }); };
       const today=new Date(); const todayStr=ymd(today);
       let store={}, cached=null;
       try{ cached=JSON.parse(localStorage.getItem(this.ADS_CKEY)||'null'); }catch(e){}
@@ -1562,7 +1562,7 @@ class Component extends DCLogic {
     const byAd={}, byAdset={};
     rows.forEach(r=>{
       if(!byAd[r.ad]) byAd[r.ad]={ name:r.ad, thumb:'', perma:'', impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
-      const a=byAd[r.ad]; a.impressions+=r.impr; a.reach+=r.reach; a.linkClicks+=r.clk; a.lpViews+=r.lpv; a.leads+=r.leads; a.spend+=r.spend; a.eng+=(r.eng||0); a.vv+=(r.vv||0); a.reac+=(r.reac||0); a.save+=(r.save||0); if(!a.thumb&&r.thumb) a.thumb=r.thumb; if(!a.perma&&r.perma) a.perma=r.perma;
+      const a=byAd[r.ad]; a.impressions+=r.impr; a.reach+=r.reach; a.linkClicks+=r.clk; a.lpViews+=r.lpv; a.leads+=r.leads; a.ic=(a.ic||0)+(r.ic||0); a.spend+=r.spend; a.eng+=(r.eng||0); a.vv+=(r.vv||0); a.reac+=(r.reac||0); a.save+=(r.save||0); if(!a.thumb&&r.thumb) a.thumb=r.thumb; if(!a.perma&&r.perma) a.perma=r.perma;
       if(!byAdset[r.adset]) byAdset[r.adset]={ name:r.adset, impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
       const s=byAdset[r.adset]; s.impressions+=r.impr; s.reach+=r.reach; s.linkClicks+=r.clk; s.lpViews+=r.lpv; s.leads+=r.leads; s.spend+=r.spend; s.eng+=(r.eng||0); s.vv+=(r.vv||0); s.reac+=(r.reac||0); s.save+=(r.save||0);
     });
@@ -1573,7 +1573,7 @@ class Component extends DCLogic {
     const hasReal = ads.length>0;
     const sum=(f)=>ads.reduce((a,x)=>a+(x[f]||0),0);
     const alcance=sum('reach'), impressoes=sum('impressions'), cliques=sum('linkClicks'),
-      lpViews=sum('lpViews'), leadsGer=sum('leads'), investido=sum('spend'),
+      lpViews=sum('lpViews'), leadsGer=sum('leads'), checkouts=sum('ic'), investido=sum('spend'),
       inter=sum('eng'), reprod=sum('vv'), reacoes=sum('reac'), salvos=sum('save');
     const cpm=impressoes? investido/impressoes*1000 : 0;
     const cpc=cliques? investido/cliques : 0;
@@ -1607,7 +1607,8 @@ class Component extends DCLogic {
         { label:'Impressões', value:impressoes, freq:div(impressoes,alcance), cost:null },
         { label:'Cliques no link', value:cliques, conv:div(cliques,impressoes), cost:money2(cpc) },
         { label:'Visualizações da página', value:lpViews, conv:div(lpViews,cliques), cost:null },
-        { label:'Vendas do gerenciador', value:leadsGer, conv:div(leadsGer,lpViews), cost:money2(custoGer) },
+        { label:'Inicialização de checkout', value:checkouts, conv:div(checkouts,lpViews), cost:money2(checkouts? investido/checkouts : 0) },
+        { label:'Vendas do gerenciador', value:leadsGer, conv:div(leadsGer,checkouts), cost:money2(custoGer) },
       ];
       investStats=[
         { label:'Investimento', value:'R$ '+this.fmtNum(investido) },
