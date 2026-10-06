@@ -93,16 +93,12 @@
     </div>
 
     <div style="max-width:1280px; margin:0 auto; padding:0 32px 14px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;">
-      <nav style="display:flex; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:nowrap; overflow:hidden;">
+      <nav style="display:flex; gap:4px; flex:1 1 auto; min-width:0; flex-wrap:wrap;">
         <sc-for list="{{ pages }}" as="p" hint-placeholder-count="3">
           <button onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</button>
         </sc-for>
       </nav>
       <div style="display:flex; align-items:flex-end; gap:12px; flex:0 0 auto;">
-        <div style="display:flex; gap:6px; padding-bottom:3px;">
-          <button onClick="{{ navPrev }}" aria-label="Página anterior" title="Página anterior" style="{{ navArrowStyle }}">‹</button>
-          <button onClick="{{ navNext }}" aria-label="Próxima página" title="Próxima página" style="{{ navArrowStyle }}">›</button>
-        </div>
         <sc-if value="{{ showFilters }}" hint-placeholder-val="{{ true }}">
         <label style="display:flex; flex-direction:column; gap:4px;">
           <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Mês</span>
@@ -113,13 +109,16 @@
           </select>
         </label>
         <label style="display:flex; flex-direction:column; gap:4px;">
-          <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Semana</span>
-          <select class="b-select" value="{{ week }}" onChange="{{ onWeek }}" style="height:38px; padding:0 12px; min-width:230px;">
-            <sc-for list="{{ weekOptions }}" as="o" hint-placeholder-count="5">
-              <option value="{{ o.value }}">{{ o.label }}</option>
-            </sc-for>
-          </select>
+          <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Data inicial</span>
+          <input type="date" class="b-select" value="{{ dFromVal }}" min="{{ dMin }}" max="{{ dMax }}" onChange="{{ onDFrom }}" style="height:38px; padding:0 12px;">
         </label>
+        <label style="display:flex; flex-direction:column; gap:4px;">
+          <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Data final</span>
+          <input type="date" class="b-select" value="{{ dToVal }}" min="{{ dMin }}" max="{{ dMax }}" onChange="{{ onDTo }}" style="height:38px; padding:0 12px;">
+        </label>
+        <sc-if value="{{ hasDFilter }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ onDClear }}" style="height:38px; padding:0 14px; font-family:var(--font-sans); font-size:12px; cursor:pointer; border-radius:6px; border:1px solid var(--border-strong); background:transparent; color:var(--text-muted);">Limpar</button>
+        </sc-if>
         </sc-if>
         <sc-if value="{{ showFunnelFilters }}" hint-placeholder-val="{{ false }}">
         <label style="display:flex; flex-direction:column; gap:4px;">
@@ -182,8 +181,8 @@
         </sc-for>
       </div>
 
-      <!-- charts 1 & 2 -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+      <!-- charts 1 & 2 (empilhados, mesma largura da linha de KPIs) -->
+      <div style="display:grid; grid-template-columns:minmax(0,1fr); gap:16px;">
         <div class="b-card" style="padding:20px 22px;">
           <div style="font-size:11px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Crescimento</div>
           <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:20px; color:var(--text-strong); line-height:1.1; margin-bottom:12px;">Seguidores no período</div>
@@ -192,8 +191,8 @@
         <div class="b-card" style="padding:20px 22px;">
           <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:12px; gap:12px; flex-wrap:wrap;">
             <div>
-              <div style="font-size:11px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Por dia da semana</div>
-              <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:20px; color:var(--text-strong); line-height:1.1;">Métrica por semana</div>
+              <div style="font-size:11px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Por dia</div>
+              <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:20px; color:var(--text-strong); line-height:1.1;">Métrica por dia</div>
             </div>
             <select class="b-select" value="{{ metric2 }}" onChange="{{ onMetric2 }}" style="height:34px; padding:0 10px; min-width:180px;">
               <sc-for list="{{ metric2Options }}" as="o" hint-placeholder-count="5">
@@ -205,19 +204,6 @@
         </div>
       </div>
 
-      <!-- charts 3 & 4: engagement per week -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="b-card" style="padding:20px 22px;">
-          <div style="font-size:11px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Por dia da semana</div>
-          <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:20px; color:var(--text-strong); line-height:1.1; margin-bottom:12px;">% engajamento seguidores</div>
-          <div style="height:230px; position:relative;"><canvas id="chart-engfollowers"></canvas></div>
-        </div>
-        <div class="b-card" style="padding:20px 22px;">
-          <div style="font-size:11px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted);">Por dia da semana</div>
-          <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:20px; color:var(--text-strong); line-height:1.1; margin-bottom:12px;">% engajamento geral</div>
-          <div style="height:230px; position:relative;"><canvas id="chart-enggeneral"></canvas></div>
-        </div>
-      </div>
     </div>
     </sc-if>
 
@@ -388,7 +374,7 @@
         </div>
         <sc-if value="{{ salesFilterShow }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex; gap:6px; align-items:center;">
-          <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted); margin-right:4px;">Origem das vendas</span>
+          <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted); margin-right:4px;">Edição</span>
           <select data-keepcase="1" onChange="{{ onSalesUtm }}" value="{{ salesUtmFilter }}" style="font-family:var(--font-sans); font-size:12px; font-weight:600; cursor:pointer; padding:7px 12px; border-radius:6px; border:1px solid var(--border-strong); background:transparent; color:var(--text-strong);">
             <sc-for list="{{ salesUtmOptions }}" as="o" hint-placeholder-count="3">
               <option value="{{ o.value }}">{{ o.label }}</option>
@@ -456,10 +442,20 @@
         </sc-if>
 
         <sc-if value="{{ investShow }}" hint-placeholder-val="{{ false }}">
-        <div style="border-top:1px solid var(--border-soft); margin:26px 0 18px; padding-top:24px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+        <div style="border-top:1px solid var(--border-soft); margin:26px 0 18px; padding-top:24px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
           <div style="font-family:var(--font-sans); font-weight:600; letter-spacing:-0.01em; font-size:22px; color:var(--text-strong);">Investimento em tráfego pago</div>
+          <sc-if value="{{ campFilterShow }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span style="font-size:10px; letter-spacing:var(--ls-label); text-transform:uppercase; color:var(--text-muted); margin-right:4px;">Campanha</span>
+            <select data-keepcase="1" onChange="{{ onCampFilter }}" value="{{ campFilter }}" style="font-family:var(--font-sans); font-size:12px; font-weight:600; cursor:pointer; padding:7px 12px; border-radius:6px; border:1px solid var(--border-strong); background:var(--surface, #fff); color:var(--text-strong); max-width:420px;">
+              <sc-for list="{{ campOptions }}" as="o" hint-placeholder-count="3">
+                <option value="{{ o.value }}">{{ o.label }}</option>
+              </sc-for>
+            </select>
+          </div>
+          </sc-if>
         </div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:16px;">
+        <div style="display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:12px; margin-bottom:16px;">
           <sc-for list="{{ investStats }}" as="st" hint-placeholder-count="5">
             <div class="b-card" style="padding:14px 16px; min-height:88px; display:flex; flex-direction:column; justify-content:space-between; border-top:3px solid #172219;">
               <div style="font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); line-height:1.3;">{{ st.label }}</div>
@@ -669,7 +665,9 @@ class Component extends DCLogic {
     this.state = {
       page: 'conta',
       month: 'all',
-      week: this.model.DEFAULT_WEEK.iso,
+      week: 'all',
+      dFrom: this.model.DEFAULT_WEEK.start,
+      dTo: (this.model.DEFAULT_WEEK.end>this.model.maxDate? this.model.maxDate : this.model.DEFAULT_WEEK.end),
       metric2: 'views',
       topMetric: 'views',
       refreshing: false,
@@ -684,6 +682,7 @@ class Component extends DCLogic {
       candFrom: (function(){var n=new Date(),y=n.getFullYear(),m=n.getMonth(),pm=m===0?11:m-1,py=m===0?y-1:y;return py+'-'+String(pm+1).padStart(2,'0')+'-01';})(),
       candTo: '',
       salesUtmFilter: 'all',
+      adCampFilter: 'all',
       demo: null,
       ads: null,
       adsLoading: false,
@@ -702,9 +701,10 @@ class Component extends DCLogic {
       reset:      /RESET/i,
       ciclo:      /CICLO[\s-]*LEVE/i,
       essencia:   /ESS[EÊ]NCIA[\s-]*METAB/i,
+      raiox:      /RAIO[\s-]*X/i,
       engajamento:/ENGAJAMENTO/i,
     };
-    this.ADS_CKEY = 'priAdsCampaigns:v6';
+    this.ADS_CKEY = 'priAdsCampaigns:v9';
     // Vendas (Eduzz) — planilhas mensais públicas no Drive, lidas ao vivo via gviz.
     this.SALES_SHEETS = {
       '2025-05':'1-gOe6ojnzaMAD3MnUijgxr5JdWvcaZUk24zZ-SImWMA',
@@ -732,13 +732,14 @@ class Component extends DCLogic {
       '2696694':'ciclo','2741885':'ciclo','2749859':'ciclo','2825927':'ciclo','2920051':'ciclo','2839425':'ciclo',
       '2854310':'essencia',
     };
-    this.SALES_CKEY = 'priSales:v8';
+    this.SALES_CKEY = 'priSales:v9';
     // produtos (abas da página dados das campanhas) — só os botões por enquanto
     this.CAMPAIGNS = [
       { key:'wa', name:"Woman's Academy" },
       { key:'reset', name:'Reset Hormonal' },
       { key:'ciclo', name:'Ciclo Leve' },
       { key:'essencia', name:'Essência Metabólica' },
+      { key:'raiox', name:'Raio-X' },
       { key:'seguidores', name:'Novos Seguidores' },
       { key:'engajamento', name:'Engajamento' },
     ];
@@ -953,6 +954,13 @@ class Component extends DCLogic {
   /* ============ WINDOW + AGG ============ */
   windowOf(){
     const M=this.model;
+    if(this.state.dFrom || this.state.dTo){
+      let start=this.state.dFrom||M.minDate, end=this.state.dTo||M.maxDate; if(start>end){ const t=start; start=end; end=t; }
+      if(end>M.maxDate) end=M.maxDate; if(start<M.minDate) start=M.minDate; if(start>end) start=end;
+      const n=Math.round((new Date(end+'T12:00:00')-new Date(start+'T12:00:00'))/864e5)+1;
+      const prevEnd=this.addDays(start,-1), prevStart=this.addDays(start,-n);
+      return { start, end, kind:'range', label:this.ddmm(start)+' – '+this.ddmm(end), prev: prevEnd>=M.minDate? {start:prevStart<M.minDate?M.minDate:prevStart, end:prevEnd} : null };
+    }
     if(this.state.week!=='all'){
       const w=M.weeks.find(x=>x.iso===this.state.week)||M.DEFAULT_WEEK;
       const idx=M.weeks.indexOf(w); const prev= idx>0? M.weeks[idx-1]:null;
@@ -1022,7 +1030,7 @@ class Component extends DCLogic {
       const actSum = daily.reduce((a,d)=>a+d.reach+d.views+d.interactions,0);
       this._live = { profile, daily, follows, actSum };
       this.model=this.buildModel({ profile, daily, follows, media:[] });
-      this.setState({ live:true, dataError:'', lastSync:this.nowStamp(), lastSyncYMD:this.nowYMD(), month:'all', week:this.model.DEFAULT_WEEK.iso, mediaLoading:true, dormant:false });
+      this.setState({ live:true, dataError:'', lastSync:this.nowStamp(), lastSyncYMD:this.nowYMD(), month:'all', week:'all', dFrom:this.model.DEFAULT_WEEK.start, dTo:(this.model.DEFAULT_WEEK.end>this.model.maxDate? this.model.maxDate : this.model.DEFAULT_WEEK.end), mediaLoading:true, dormant:false });
 
       // ── Phase 2: per-post insights — só os últimos 30 dias são buscados; o
       //    histórico anterior fica estático em cache (localStorage). ──
@@ -1136,13 +1144,13 @@ class Component extends DCLogic {
   componentDidMount(){ this.drawCharts(); try{ const c=JSON.parse(localStorage.getItem(this.SEG_CKEY)||'null'); if(c&&Object.keys(c).length) this.setState({seg:c}); }catch(e){} this.fetchLive(); this.fetchAds(); this.fetchDemographics(); this.fetchSales(); this.fetchSeguidores(); }
 
   // Facebook Ads (Windsor) — campanhas por produto (WA/Reset/Ciclo/Essência).
-  // Semeia desde mai/2025 (cache) e depois só re-busca os 3 dias anteriores à atualização.
+  // Semeia desde mai/2025 uma única vez (cache) e depois só re-busca o mês atual + o anterior.
   async fetchAds(){
     if(this.state.adsLoading) return;
     this.setState({adsLoading:true, adsError:''});
     try{
       const key=this.WINDSOR_KEY;
-      const fields='account_id,campaign,adset_name,ad_name,thumbnail_url,instagram_permalink_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_purchase,actions_initiate_checkout,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
+      const fields='account_id,campaign,campaign_start_time,adset_name,ad_name,thumbnail_url,instagram_permalink_url,date,impressions,reach,inline_link_clicks,actions_landing_page_view,actions_purchase,actions_lead,actions_initiate_checkout,inline_post_engagement,actions_video_view,actions_post_reaction,actions_onsite_conversion_post_save,actions_post,spend';
       const num=(v)=>(v==null||v==='')?0:(+v||0);
       const acct=this.ADS_ACCOUNT_ID;
       const ymd=(d)=>this.ymd(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())));
@@ -1156,23 +1164,45 @@ class Component extends DCLogic {
       // uma campanha pode casar com vários baldes (ex.: [ENGAJAMENTO][CICLO-LEVE] entra em ciclo E engajamento)
       const prodsOf=(camp)=>{ const out=[]; for(const k of Object.keys(this.ADS_CAMPAIGN_MATCH)){ if(this.ADS_CAMPAIGN_MATCH[k].test(camp||'')) out.push(k); } return out; };
       const ingest=(store, rows)=>{ rows.forEach(x=>{ const ps=prodsOf(x.campaign); if(!ps.length) return;
-        const d=dnorm(x.date), ad=x.ad_name||'(sem nome)';
-        ps.forEach(p=>{ const id=p+'|'+d+'|'+ad;
-          if(!store[id]) store[id]={ c:p, d, ad, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', perma:x.instagram_permalink_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,ic:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
-          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(x.actions_purchase); s.ic=(s.ic||0)+num(x.actions_initiate_checkout); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; if(!s.perma&&x.instagram_permalink_url) s.perma=x.instagram_permalink_url; }); }); };
+        const d=dnorm(x.date), ad=x.ad_name||'(sem nome)', cn=x.campaign||'', cs=dnorm(x.campaign_start_time)||d;
+        ps.forEach(p=>{ const id=p+'|'+d+'|'+cn+'|'+ad;
+          if(!store[id]) store[id]={ c:p, d, ad, cn, cs, adset:x.adset_name||'(sem conjunto)', thumb:x.thumbnail_url||'', perma:x.instagram_permalink_url||'', impr:0,reach:0,clk:0,lpv:0,leads:0,ic:0,spend:0, eng:0,vv:0,reac:0,save:0,shr:0 };
+          const s=store[id]; s.impr+=num(x.impressions); s.reach+=num(x.reach); s.clk+=num(x.inline_link_clicks); s.lpv+=num(x.actions_landing_page_view); s.leads+=num(p==='raiox'? x.actions_lead : x.actions_purchase); /* Raio-X é captação: conta cadastros */ s.ic=(s.ic||0)+num(x.actions_initiate_checkout); s.spend+=num(x.spend); s.eng+=num(x.inline_post_engagement); s.vv+=num(x.actions_video_view); s.reac+=num(x.actions_post_reaction); s.save+=num(x.actions_onsite_conversion_post_save); s.shr+=num(x.actions_post); if(!s.thumb&&x.thumbnail_url) s.thumb=x.thumbnail_url; if(!s.perma&&x.instagram_permalink_url) s.perma=x.instagram_permalink_url; }); }); };
       const today=new Date(); const todayStr=ymd(today);
       let store={}, cached=null;
       try{ cached=JSON.parse(localStorage.getItem(this.ADS_CKEY)||'null'); }catch(e){}
       if(cached && cached.rows && cached.through){
-        cached.rows.forEach(s=>{ store[s.c+'|'+s.d+'|'+s.ad]=s; });
-        const cut=ymd(new Date(today.getTime()-3*86400000));          // 3 dias anteriores
+        cached.rows.forEach(s=>{ store[s.c+'|'+s.d+'|'+(s.cn||'')+'|'+s.ad]=s; });
+        this.publishAds(Object.values(store), true);                   // pinta o cache na hora
+        // re-busca desde 3 dias antes da ÚLTIMA leitura (cobre o período em que o dash ficou fechado)
+        // janela móvel: re-busca só o mês atual + o anterior (o resto do histórico fica salvo)
+        const thr=new Date(cached.through+'T12:00:00');
+        const prevStart=new Date(today.getFullYear(), today.getMonth()-1, 1, 12);
+        const cutD=new Date(Math.min(prevStart.getTime(), thr.getTime()-3*86400000));
+        const cut=ymd(cutD);
         Object.keys(store).forEach(id=>{ if(store[id].d>=cut) delete store[id]; });
-        ingest(store, await fetchRange(cut, todayStr));
+        // janelas de até 31 dias em paralelo
+        const wins=[]; let s=new Date(cutD);
+        while(ymd(s)<=todayStr){ const e=new Date(Math.min(s.getTime()+30*864e5, today.getTime())); wins.push([ymd(s), ymd(e)]); s=new Date(e.getTime()+864e5); }
+        const res=await Promise.all(wins.map(w=>fetchRange(w[0],w[1])));
+        res.forEach(rows=>ingest(store, rows));
       }else{
-        ingest(store, await fetchRange('2025-05-01', todayStr));        // semente histórica
+        // semente histórica em blocos mensais paralelos (4 por vez) — bem mais rápido que 1 request gigante
+        const wins=[]; let y=2025, m=5;
+        while(true){ const st=y+'-'+String(m).padStart(2,'0')+'-01'; if(st>todayStr) break;
+          const last=new Date(Date.UTC(y,m,0)).getUTCDate(); let en=y+'-'+String(m).padStart(2,'0')+'-'+String(last).padStart(2,'0'); if(en>todayStr) en=todayStr;
+          wins.push([st,en]); m++; if(m>12){m=1;y++;} }
+        wins.reverse();                                                  // mais recente primeiro
+        let i=0; const worker=async()=>{ while(i<wins.length){ const w=wins[i++]; ingest(store, await fetchRange(w[0],w[1])); this.publishAds(Object.values(store), true); } };
+        await Promise.all([worker(),worker(),worker(),worker()]);
       }
       const rowsArr=Object.values(store);
       try{ localStorage.setItem(this.ADS_CKEY, JSON.stringify({ through:todayStr, rows:rowsArr })); }catch(e){}
+      this.publishAds(rowsArr, false);
+    }catch(e){ this.setState({adsLoading:false, adsError:(e&&e.message)||'Falha ao ler Facebook Ads.'}); }
+  }
+
+  publishAds(rowsArr, stillLoading){
       // agrega por produto → anúncios e conjuntos
       const ads={}, adsets={};
       Object.keys(this.ADS_CAMPAIGN_MATCH).forEach(p=>{ ads[p]={}; adsets[p]={}; });
@@ -1183,8 +1213,7 @@ class Component extends DCLogic {
         const ss=adsets[p][s.adset]; ss.impressions+=s.impr; ss.reach+=s.reach; ss.linkClicks+=s.clk; ss.lpViews+=s.lpv; ss.leads+=s.leads; ss.spend+=s.spend; });
       const adsOut={}, adsetsOut={};
       Object.keys(ads).forEach(p=>{ adsOut[p]=Object.values(ads[p]).sort((a,b)=>b.impressions-a.impressions); adsetsOut[p]=Object.values(adsets[p]).sort((a,b)=>b.impressions-a.impressions); });
-      this.setState({adsLoading:false, ads:adsOut, adsets:adsetsOut, adRows:rowsArr});
-    }catch(e){ this.setState({adsLoading:false, adsError:(e&&e.message)||'Falha ao ler Facebook Ads.'}); }
+      this.setState({adsLoading:!!stillLoading, ads:adsOut, adsets:adsetsOut, adRows:rowsArr});
   }
 
   /* ============ FILTROS DE DATA ============ */
@@ -1309,31 +1338,31 @@ class Component extends DCLogic {
     // selectors
     const monthOptions=[{value:'all',label:'Todos os meses'}].concat(M.months);
     const weekOptions=[{value:'all',label:'Todas as semanas'}].concat(M.weeks.map(w=>({value:w.iso,label:w.label})));
-    const pages=[{key:'conta',label:'Dados da Conta'},{key:'conteudos',label:'Dados dos Conteúdos'},{key:'insights',label:'Insights dos Conteúdos'},{key:'candidaturas',label:'Dados das Campanhas'}].map(p=>({
+    const pages=[{key:'conta',label:'Dados da Conta'},{key:'conteudos',label:'Dados dos Conteúdos'},{key:'candidaturas',label:'Dados das Campanhas'}].map(p=>({
       label:p.label,
       onClick:()=>this.setPage(p.key),
       style:`white-space:nowrap; flex:0 0 auto; font-family:var(--font-sans); font-size:13px; font-weight:${S.page===p.key?'600':'500'}; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid ${S.page===p.key?'var(--border-soft)':'transparent'}; border-bottom:2px solid ${S.page===p.key?accent:'transparent'}; background:${S.page===p.key?'var(--surface-page)':'transparent'}; color:${S.page===p.key?'var(--text-strong)':'var(--text-muted)'};`
     }));
-    pages.push({
-      label:'Painel de Performance',
-      onClick:()=>window.open('https://cursos.pririciardi.com.br/painel-performance/','_blank','noopener'),
-      style:`white-space:nowrap; flex:0 0 auto; font-family:var(--font-sans); font-size:13px; font-weight:500; cursor:pointer; padding:8px 16px; border-radius:var(--radius-md) var(--radius-md) 0 0; border:1px solid transparent; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted);`
-    });
 
     const base={
       brand:M.profile, lastSync:S.lastSync, refreshing:S.refreshing, refreshLabel: S.refreshing?'Atualizando…':'Atualizar',
       onRefresh:()=>this.onRefresh(),
-      navPrev:()=>{ const o=['conta','conteudos','insights','candidaturas']; const i=o.indexOf(S.page); this.setPage(o[(i-1+o.length)%o.length]); },
-      navNext:()=>{ const o=['conta','conteudos','insights','candidaturas']; const i=o.indexOf(S.page); this.setPage(o[(i+1)%o.length]); },
+      navPrev:()=>{ const o=['conta','conteudos','candidaturas']; const i=o.indexOf(S.page); this.setPage(o[(i-1+o.length)%o.length]); },
+      navNext:()=>{ const o=['conta','conteudos','candidaturas']; const i=o.indexOf(S.page); this.setPage(o[(i+1)%o.length]); },
       navArrowStyle:'display:flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; cursor:pointer; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:transparent; color:var(--text-body); font-family:var(--font-sans); font-size:15px; line-height:1;',
       sourceLabel: S.dataError? ('erro: '+S.dataError).slice(0,58) : (S.mediaLoading? ('ao vivo · @'+M.profile.handle+' · carregando dados…') : (S.refreshing? 'buscando dados ao vivo…' : (S.live? ('ao vivo · @'+M.profile.handle) : 'snapshot de demonstração'))),
       sourceColor: S.dataError? 'var(--danger)' : (S.mediaLoading? 'var(--warning)' : (S.live? 'var(--success)' : 'var(--ink-300)')),
       dormant: S.dormant && !S.mediaLoading,
       pages, month:S.month, week:S.week, monthOptions, weekOptions,
-      onMonth:(e)=>this.setState({month:e.target.value, week:'all'}),
+      onMonth:(e)=>this.setState({month:e.target.value, week:'all', dFrom:'', dTo:''}),
       onWeek:(e)=>this.setState({week:e.target.value}),
+      dFromVal: win.start, dToVal: win.end, dMin: M.minDate, dMax: M.maxDate,
+      onDFrom:(e)=>this.setState({dFrom:e.target.value, dTo:S.dTo||win.end, month:'all', week:'all'}),
+      onDTo:(e)=>this.setState({dTo:e.target.value, dFrom:S.dFrom||win.start, month:'all', week:'all'}),
+      hasDFilter: !!(S.dFrom||S.dTo||S.month!=='all'),
+      onDClear:()=>this.setState({dFrom:'', dTo:'', month:'all', week:'all'}),
       accent, periodLabel: win.label,
-      isConta:S.page==='conta', isConteudos:S.page==='conteudos', isInsights:S.page==='insights', isCandidaturas:S.page==='candidaturas',
+      isConta:S.page==='conta', isConteudos:S.page==='conteudos', isInsights:false, isCandidaturas:S.page==='candidaturas',
       showFilters: S.page!=='candidaturas',
       showFunnelFilters: S.page==='candidaturas',
       pageTitle: S.page==='conta'?'Dados da Conta': S.page==='conteudos'?'Dados dos Conteúdos': S.page==='insights'?'Insights dos Conteúdos':'Dados das Campanhas',
@@ -1362,16 +1391,17 @@ class Component extends DCLogic {
 
     // chart configs
     const flWin=M.timeline.filter(t=>t.date>=win.start && t.date<=win.end);
-    const metricFns={ views:r=>r.views, reach:r=>r.reach, interactionRate:r=>r.reach?r.interactions/r.reach*100:null, saveRate:r=>r.reach?r.saves/r.reach*100:null, shareRate:r=>r.reach?r.shares/r.reach*100:null };
+    const metricFns={ engG:r=>r.reach? r.interactions/r.reach*100 : null, views:r=>r.views, reach:r=>r.reach, interactionRate:r=>r.reach?r.interactions/r.reach*100:null, saveRate:r=>r.reach?r.saves/r.reach*100:null, shareRate:r=>r.reach?r.shares/r.reach*100:null };
     const metric2Pct = (S.metric2!=='views' && S.metric2!=='reach');
     const wdLabels=['seg','ter','qua','qui','sex','sáb','dom'];
+    const chDays=[]; for(let d=win.start; d && d<=win.end && d<=M.maxDate; d=this.addDays(d,1)){ chDays.push(d); if(chDays.length>800) break; }
+    const chLabels=chDays.map(d=>this.ddmm(d));
+    const m2=metricFns[S.metric2];
     this._chartCfgs={
-      'chart-followers': this.lineCfg(flWin.map(t=>this.ddmm(t.date)), [{label:'seguidores', data:flWin.map(t=>t.value), color:accent, fill:true, fillColor:'rgba(23,34,25,0.08)'}], {zero:false}),
-      'chart-metric2': this.lineCfg(wdLabels, this.weekdayDatasets(win, metricFns[S.metric2]), {pct:metric2Pct, zero:metric2Pct}),
-      'chart-engfollowers': this.lineCfg(wdLabels, this.weekdayDatasets(win, r=> followers? r.interactions/followers*100 : null), {pct:true, zero:true}),
-      'chart-enggeneral': this.lineCfg(wdLabels, this.weekdayDatasets(win, r=> r.reach? r.interactions/r.reach*100 : null), {pct:true, zero:true}),
+      'chart-followers': this.lineCfg(chLabels, [{label:'seguidores', data:chDays.map(d=>this.tlAt(d)), color:accent, fill:true, fillColor:'rgba(23,34,25,0.08)'}], {zero:false}),
+      'chart-metric2': this.lineCfg(chLabels, [{label:'métrica', data:chDays.map(d=>{ const r=this.dailyAt(d); return r? m2(r) : null; }), color:accent, fill:true, fillColor:'rgba(23,34,25,0.08)'}], {pct:metric2Pct, zero:metric2Pct}),
     };
-    const metric2Options=[{value:'views',label:'Visualizações'},{value:'reach',label:'Alcance'},{value:'interactionRate',label:'Taxa de Interação'},{value:'saveRate',label:'Taxa de Salvamento'},{value:'shareRate',label:'Taxa de Compartilhamento'}];
+    const metric2Options=[{value:'views',label:'Visualizações'},{value:'reach',label:'Alcance'},{value:'interactionRate',label:'Taxa de Interação'},{value:'saveRate',label:'Taxa de Salvamento'},{value:'shareRate',label:'Taxa de Compartilhamento'},{value:'engG',label:'% Engajamento geral'}];
 
     // CONTEUDOS
     const PM = this.postMetrics !== false; // per-post numeric metrics available?
@@ -1552,13 +1582,21 @@ class Component extends DCLogic {
   // Investimento da campanha — Facebook Ads (por produto: WA/Reset/Ciclo/Essência).
   investFunnel(key, total){
     if(key==='seguidores') return this.followerFunnel();
-    if(!this.ADS_CAMPAIGN_MATCH[key]){ return { investShow:false, segMode:false, showAdsets:false, showAds:false, segDailyShow:false, investStages:[], investStats:[], investAds:[], investAdsets:[], investPubs:[], investEyebrow:'', adsStatus:'' }; }
+    if(!this.ADS_CAMPAIGN_MATCH[key]){ return { campFilterShow:false, campOptions:[], investShow:false, segMode:false, showAdsets:false, showAds:false, segDailyShow:false, investStages:[], investStats:[], investAds:[], investAdsets:[], investPubs:[], investEyebrow:'', adsStatus:'' }; }
     const money2=(v)=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     const S=this.state;
     // respeita os filtros de mês / intervalo de datas da página
     const inRange=(d)=>{ if(!d) return false; if(S.candMonth!=='all' && d.slice(0,7)!==S.candMonth) return false; if(S.candFrom && d<S.candFrom) return false; if(S.candTo && d>S.candTo) return false; return true; };
-    const rows=(S.adRows||[]).filter(r=> r.c===key && inRange(r.d));
+    const _ed=this.edFilterFor(key);
+    const _base=(S.adRows||[]).filter(r=> r.c===key && inRange(r.d) && (!_ed || this.editionOf(key, r.cn, r.cs||r.d)===_ed));
+    // filtro de campanha (nome completo do Meta) — opções = campanhas com dados no período/edição
+    const _cm={}; _base.forEach(r=>{ const n=r.cn||'(sem nome)'; _cm[n]=(_cm[n]||0)+(r.spend||0); });
+    const campOptions=[{value:'all',label:'Todas as campanhas'}].concat(Object.keys(_cm).sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})).map(n=>({value:n,label:n+' · R$ '+this.fmtNum(_cm[n])})));
+    const campFilter=(S.adCampFilter in _cm)? S.adCampFilter : 'all';
+    const rows= campFilter==='all'? _base : _base.filter(r=>(r.cn||'(sem nome)')===campFilter);
+    const campUi={ campOptions, campFilter, campFilterShow: Object.keys(_cm).length>0, onCampFilter:(e)=>this.setState({adCampFilter:e.target.value}) };
     const isEng = key==='engajamento';
+    const isLead = key==='raiox';
     const byAd={}, byAdset={};
     rows.forEach(r=>{
       if(!byAd[r.ad]) byAd[r.ad]={ name:r.ad, thumb:'', perma:'', impressions:0,reach:0,linkClicks:0,lpViews:0,leads:0,spend:0, eng:0,vv:0,reac:0,save:0 };
@@ -1601,6 +1639,24 @@ class Component extends DCLogic {
       ];
       colAds=['Interações','Reproduções','Reações','Taxa de eng.'];
       colSets=['Interações','Reprod.','Reações','Taxa eng.'];
+    }else if(isLead){
+      raw=[
+        { label:'Alcance', value:alcance, conv:null, cost:null },
+        { label:'Impressões', value:impressoes, freq:div(impressoes,alcance), cost:null },
+        { label:'Cliques no link', value:cliques, conv:div(cliques,impressoes), cost:money2(cpc) },
+        { label:'Visualizações da página', value:lpViews, conv:div(lpViews,cliques), cost:null },
+        { label:'Leads (cadastros)', value:leadsGer, conv:div(leadsGer,lpViews), cost:money2(custoGer) },
+      ];
+      investStats=[
+        { label:'Investimento', value:'R$ '+this.fmtNum(investido) },
+        { label:'CPM', value:money2(cpm) },
+        { label:'Custo por clique', value:money2(cpc) },
+        { label:'Connect rate', value:this.fmtPct(connectRate) },
+        { label:'Conversão da página', value:this.fmtPct(lpViews? leadsGer/lpViews*100 : 0) },
+        { label:'Custo por lead', value:money2(custoGer) },
+      ];
+      colAds=['Cliques no link','Visualização da página','Connect rate','Leads'];
+      colSets=['Cliques','Visu. pág.','Connect','Leads'];
     }else{
       raw=[
         { label:'Alcance', value:alcance, conv:null, cost:null },
@@ -1618,6 +1674,12 @@ class Component extends DCLogic {
         { label:'Conversão da página', value:this.fmtPct(lpViews? leadsGer/lpViews*100 : 0) },
         { label:'Custo por venda', value:money2(custoGer) },
       ];
+    if(!isEng){
+      // ROAS = faturamento pago (Eduzz) no período/edição ÷ investimento das campanhas filtradas
+      const fats=new Set(); let fatT=0;
+      Object.values(S.sales||{}).forEach(arr=>arr.forEach(r=>{ if(r.tab===key && r.status==='Paga' && inRange(r.date) && (!_ed || this.editionOf(key, r.prod, r.date)===_ed) && !fats.has(r.fatura)){ fats.add(r.fatura); fatT+=r.item; } }));
+      investStats.push({ label:'ROAS', value: investido? (fatT/investido).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'x' : '—' });
+    }
       colAds=['Cliques no link','Visualização da página','Connect rate','Vendas do gerenciador'];
       colSets=['Cliques','Visu. pág.','Connect','Vendas'];
     }
@@ -1669,7 +1731,7 @@ class Component extends DCLogic {
     const mk=(prop,col)=>()=>{ const cur=this.state[prop]||{col:'',dir:-1}; const dir=(cur.col===col)? -cur.dir : (col==='name'?1:-1); this.setState({[prop]:{col,dir}}); };
     const sortH={ adName:mk('adSort','name'),adImpr:mk('adSort','impr'),adCtr:mk('adSort','ctr'),adClk:mk('adSort','clk'),adLpv:mk('adSort','lpv'),adCr:mk('adSort','cr'),adLeads:mk('adSort','leads'),
       setName:mk('adsetSort','name'),setImpr:mk('adsetSort','impr'),setCtr:mk('adsetSort','ctr'),setClk:mk('adsetSort','clk'),setLpv:mk('adsetSort','lpv'),setCr:mk('adsetSort','cr'),setPconv:mk('adsetSort','pconv'),setLeads:mk('adsetSort','leads') };
-    return { investShow:true, segMode:false, showAdsets:true, showAds:true, investStages, investStats, investAds, investAdsets, investPubs:[], investEyebrow, adsStatus, caret, sortH, showPconv:!isEng,
+    return { investShow:true, segMode:false, showAdsets:true, showAds:true, investStages, investStats, investAds, investAdsets, investPubs:[], investEyebrow, adsStatus, caret, sortH, showPconv:!isEng, ...campUi,
       colA2:colAds[0], colA3:colAds[1], colA4:colAds[2], colA5:colAds[3],
       colS2:colSets[0], colS3:colSets[1], colS4:colSets[2], colS5:colSets[3] };
   }
@@ -1679,6 +1741,7 @@ class Component extends DCLogic {
   async fetchSales(force){
     if(this.state.salesLoading) return;
     this.setState({salesLoading:true, salesError:''});
+    try{ const c0=JSON.parse(localStorage.getItem(this.SALES_CKEY)||'{}'); const s0={}; Object.keys(c0).forEach(k=>{ if(k.indexOf('__')!==0) s0[k]=c0[k]; }); if(Object.keys(s0).length) this.setState({sales:s0}); }catch(e){}
     try{
       const now=new Date();
       const curYM=now.toISOString().slice(0,7);
@@ -1700,7 +1763,7 @@ class Component extends DCLogic {
       const mods = this._salesMod||{};
       const newIds = {}; const newMod = {};
       const sales={};
-      for(const ym of Object.keys(sheets)){
+      await Promise.all(Object.keys(sheets).map(async(ym)=>{
         const cached = cache[ym] && Array.isArray(cache[ym]);
         // arquivo re-subido = ID diferente do que lemos da última vez → força releitura desse mês
         const idChanged = savedIds[ym] !== sheets[ym];
@@ -1708,14 +1771,14 @@ class Component extends DCLogic {
         const modChanged = !!mods[ym] && savedMod[ym] !== mods[ym];
         const fresh = force || (ym===curYM) || (ym===prevYM) || !cached || idChanged || modChanged;
         newIds[ym] = sheets[ym]; newMod[ym] = mods[ym]||savedMod[ym]||'';
-        if(!fresh){ sales[ym]=cache[ym]; continue; }
+        if(!fresh){ sales[ym]=cache[ym]; return; }
         try{
           const url='https://docs.google.com/spreadsheets/d/'+sheets[ym]+'/gviz/tq?tqx=out:csv&_cb='+Date.now();
           const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
           const agg=this.aggregateSales(this.parseCSV(await r.text()));
           sales[ym]=agg; cache[ym]=agg;
         }catch(e){ if(cached) sales[ym]=cache[ym]; }
-      }
+      }));
       cache.__ids = newIds; cache.__mod = newMod;
       try{ localStorage.setItem(this.SALES_CKEY, JSON.stringify(cache)); }catch(e){}
       this.setState({salesLoading:false, sales});
@@ -1792,10 +1855,24 @@ class Component extends DCLogic {
       out.push({ fatura:(r[0]||'').trim(), status:(r[1]||'').trim(),
         date:this.parseRowDate(r[8])||this.parseRowDate(r[10]), item:num(r[26]), net:num(r[36]), tab,
         utm:(r[50]||'').trim(), cupom:(r[20]||'').trim(), oferta:(r[56]||'').trim(),
-        utmCamp:(r[51]||'').trim(), utmCont:(r[53]||'').trim() });
+        utmCamp:(r[51]||'').trim(), utmCont:(r[53]||'').trim(), prod:(r[17]||'').trim() });
     });
     return out;
   }
+
+  // Edição unificada (Eduzz + Meta): produto da aba + estação (se houver) + ano.
+  // Meta usa o nome da campanha e a data de criação; Eduzz usa o nome do produto e a data da venda.
+  // No Reset, quando o nome não traz a estação, ela é inferida pelo mês (hemisfério sul).
+  editionOf(tab, name, date){
+    const PROD={wa:"Woman's Academy", reset:'Reset Hormonal', ciclo:'Ciclo Leve', essencia:'Essência Metabólica'};
+    if(!PROD[tab]) return '';
+    const n=String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const y=String(date||'').slice(0,4); const mo=+String(date||'').slice(5,7);
+    let s=''; if(/verao/.test(n)) s='Verão'; else if(/outono/.test(n)) s='Outono'; else if(/inverno/.test(n)) s='Inverno'; else if(/primavera/.test(n)) s='Primavera';
+    if(!s && tab==='reset' && mo){ s = (mo===12||mo<=2)?'Verão' : mo<=5?'Outono' : mo<=8?'Inverno' : 'Primavera'; }
+    return PROD[tab]+(s?' '+s:'')+(y?' · '+y:'');
+  }
+  edFilterFor(key){ const S=this.state; const f=S.salesUtmFilter||'all'; if(f==='all'||!['wa','reset','ciclo','essencia'].includes(key)) return null; return f; }
 
   // Classifica um produto pela nomenclatura da Eduzz — pega lotes/edições novos (ID novo) sem precisar mapear à mão.
   salesTabForName(name){
@@ -1810,24 +1887,27 @@ class Component extends DCLogic {
 
   // KPIs de vendas para um produto, respeitando o filtro de mês / intervalo da página.
   salesInfo(key){
-    if(key==='seguidores' || key==='engajamento') return { salesShow:false, salesFilterShow:false };
+    if(key==='seguidores' || key==='engajamento' || key==='raiox') return { salesShow:false, salesFilterShow:false };
     const S=this.state;
     const inRange=(d)=>{ if(!d) return false; if(S.candMonth!=='all' && d.slice(0,7)!==S.candMonth) return false; if(S.candFrom && d<S.candFrom) return false; if(S.candTo && d>S.candTo) return false; return true; };
     const norm=(u)=>{ u=(u||'').trim(); return u||'(não informado)'; };
-    // opções de origem (UTM) — globais: todas as vendas pagas de todos os produtos
+    // agrupamento por produto da Eduzz + ano (ex.: "Reset Hormonal Inverno · 2026") — só do produto da aba
+    const grp=(r)=>this.editionOf(key, r.prod, r.date);
+    const adEd=(r)=>this.editionOf(key, r.cn, r.cs||r.d);
     const optMap={};
-    Object.values(S.sales||{}).forEach(arr=>arr.forEach(r=>{ if(r.status==='Paga'){ const u=norm(r.utm); optMap[u]=(optMap[u]||0)+1; } }));
-    const salesUtmOptions=[{value:'all',label:'Todas as origens'}].concat(
-      Object.keys(optMap).sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'})).slice(0,40).map(u=>({value:u,label:u})) );
-    const uf=S.salesUtmFilter||'all';
-    // linhas do produto no range, aplicando o filtro de origem
+    Object.values(S.sales||{}).forEach(arr=>arr.forEach(r=>{ if(r.tab===key && inRange(r.date)){ const g=grp(r); if(!optMap[g]) optMap[g]=0; if(r.status==='Paga') optMap[g]++; } }));
+    (S.adRows||[]).forEach(r=>{ if(r.c===key && inRange(r.d) && r.cn){ const g=adEd(r); if(!(g in optMap)) optMap[g]=0; } });
+    const salesUtmOptions=[{value:'all',label:'Todas as edições'}].concat(
+      Object.keys(optMap).sort((a,b)=>{ const ya=a.slice(-4), yb=b.slice(-4); return ya!==yb? yb.localeCompare(ya) : a.localeCompare(b,'pt-BR',{sensitivity:'base'}); }).map(u=>({value:u,label:u+' ('+optMap[u]+')'})) );
+    const uf= (S.salesUtmFilter in optMap)? S.salesUtmFilter : 'all';
+    // linhas do produto no range, aplicando o filtro de produto/edição
     const rows=[];
-    Object.values(S.sales||{}).forEach(arr=>arr.forEach(r=>{ if(r.tab===key && inRange(r.date) && (uf==='all' || norm(r.utm)===uf)) rows.push(r); }));
+    Object.values(S.sales||{}).forEach(arr=>arr.forEach(r=>{ if(r.tab===key && inRange(r.date) && (uf==='all' || grp(r)===uf)) rows.push(r); }));
     let fat=0, net=0; const inv=new Set();
     rows.forEach(r=>{ if(r.status==='Paga'){ fat+=r.item; net+=r.net; inv.add(r.fatura); } else if(r.status==='Reembolsado'){ net+=r.net; } });
     const nVendas=inv.size, ticket= nVendas? fat/nVendas : 0;
-    const invest=(S.adRows||[]).filter(r=> r.c===key && inRange(r.d)).reduce((a,x)=>a+(x.spend||0),0);
-    const utmActive = uf!=='all';
+    const invest=(S.adRows||[]).filter(r=> r.c===key && inRange(r.d) && (uf==='all' || adEd(r)===uf)).reduce((a,x)=>a+(x.spend||0),0);
+    const utmActive = false; // filtro agora é interligado (vendas + investimento), então ROAS/custo continuam válidos
     const roas= (utmActive||!invest)? null : fat/invest;
     const custo= (utmActive||!nVendas)? null : invest/nVendas;
     const money=(v)=> 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1938,7 +2018,7 @@ class Component extends DCLogic {
     const pubCaret={ name:carP('name'),lastDay:carP('lastDay'),spend:carP('spend'),reach:carP('reach'),impr:carP('impr'),visits:carP('visits'),cost:carP('cost'),conv:carP('conv'),follows:carP('follows') };
     const mkP=(c)=>()=>{ const cur=this.state.pubSort||{col:'spend',dir:-1}; const dir=(cur.col===c)? -cur.dir : (c==='name'?1:-1); this.setState({pubSort:{col:c,dir}}); };
     const pubSortH={ name:mkP('name'),lastDay:mkP('lastDay'),spend:mkP('spend'),reach:mkP('reach'),impr:mkP('impr'),visits:mkP('visits'),cost:mkP('cost'),conv:mkP('conv'),follows:mkP('follows') };
-    return { investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, segDailyShow, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus, pubCaret, pubSortH };
+    return { campFilterShow:false, campOptions:[], investShow:true, segMode:true, showAdsets:false, showAds:false, segBudgetShow:budgetItems.length>0, segDailyShow, investEyebrow:'novos seguidores', investStages, investStats, investPubs, investAds:[], investAdsets:[], adsStatus, pubCaret, pubSortH };
   }
 
   // gráfico combinado: barras (seguidores/dia) + linha (custo por seguidor/dia), com eixo Y duplo
