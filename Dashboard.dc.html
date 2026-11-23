@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="/">
 <title>pri riciardi - análise de marketing</title>
 <script src="./support.js"></script>
 </head>
@@ -663,7 +664,7 @@ class Component extends DCLogic {
     this.model = this.buildModel();
     this.charts = {};
     this.state = {
-      page: 'conta',
+      page: this.pageFromPath(),
       month: 'all',
       week: 'all',
       dFrom: this.model.DEFAULT_WEEK.start,
@@ -994,7 +995,13 @@ class Component extends DCLogic {
   delta(cur,prev){ if(prev==null||prev===0) return {text:'—', color:'var(--ink-300)', sub:''}; const v=(cur-prev)/prev*100; const up=v>=0; return { text:(up?'▲ ':'▼ ')+this.fmtPct(Math.abs(v)), color: up?'var(--success)':'var(--danger)', sub:'' }; }
 
   /* ============ HANDLERS ============ */
-  setPage(p){ this.setState({page:p}); }
+  // Roteamento por URL: cada aba é um caminho (/conta, /conteudos, /campanhas)
+  pathForPage(p){ return p==='candidaturas' ? '/campanhas' : p==='conteudos' ? '/conteudos' : '/conta'; }
+  pageFromPath(){ var seg=''; try{ seg=(location.pathname||'').replace(/^\/+|\/+$/g,'').toLowerCase(); }catch(e){}
+    if(seg==='campanhas'||seg==='candidaturas') return 'candidaturas';
+    if(seg==='conteudos'||seg==='conteudo') return 'conteudos';
+    return 'conta'; }
+  setPage(p){ this.setState({page:p}); try{ var u=this.pathForPage(p); if(location.pathname!==u) history.pushState({page:p},'',u); }catch(e){} }
   onRefresh(){ this.fetchLive(); this.fetchAds(); this.fetchSales(true); this.fetchSeguidores(true); this.fetchDemographics(true); }
   nowStamp(){ const now=new Date(); const MN=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return now.getDate()+' '+MN[now.getMonth()]+' '+now.getFullYear()+' · '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'); }
   nowYMD(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); }
@@ -1141,7 +1148,7 @@ class Component extends DCLogic {
   }
 
   /* ============ CHARTS ============ */
-  componentDidMount(){ this.drawCharts(); try{ const c=JSON.parse(localStorage.getItem(this.SEG_CKEY)||'null'); if(c&&Object.keys(c).length) this.setState({seg:c}); }catch(e){} this.fetchLive(); this.fetchAds(); this.fetchDemographics(); this.fetchSales(); this.fetchSeguidores(); }
+  componentDidMount(){ try{ history.replaceState({page:this.state.page},'',this.pathForPage(this.state.page)); window.addEventListener('popstate',()=>{ this.setState({page:this.pageFromPath()}); }); }catch(e){} this.drawCharts(); try{ const c=JSON.parse(localStorage.getItem(this.SEG_CKEY)||'null'); if(c&&Object.keys(c).length) this.setState({seg:c}); }catch(e){} this.fetchLive(); this.fetchAds(); this.fetchDemographics(); this.fetchSales(); this.fetchSeguidores(); }
 
   // Facebook Ads (Windsor) — campanhas por produto (WA/Reset/Ciclo/Essência).
   // Semeia desde mai/2025 uma única vez (cache) e depois só re-busca o mês atual + o anterior.

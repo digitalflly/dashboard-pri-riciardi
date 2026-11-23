@@ -1,5 +1,8 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/Dashboard.dc.html" }
+    { "source": "/", "destination": "/Dashboard.dc.html" },
+    { "source": "/conta", "destination": "/Dashboard.dc.html" },
+    { "source": "/conteudos", "destination": "/Dashboard.dc.html" },
+    { "source": "/campanhas", "destination": "/Dashboard.dc.html" }
   ]
 }
